@@ -4,6 +4,7 @@ import clientesReducer from '../redux/clientes/clientesSlice';
 import destinosReducer from '../redux/destinos/destinosSlice';
 import mercaderiaReducer from '../redux/mercaderia/mercaderiaSlice';
 import reportesReducer from '../redux/reportes/reportesSlice';
+import categoriasReducer from '../redux/categorias/categoriasSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     destinos: destinosReducer,
     mercaderia: mercaderiaReducer,
     reportes: reportesReducer,
+    categorias: categoriasReducer,
   },
 });
 

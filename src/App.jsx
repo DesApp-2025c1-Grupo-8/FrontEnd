@@ -1,33 +1,42 @@
 import './App.css';
-
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Documents from "./pages/Documents.jsx";
 import Clients from "./pages/Clients.jsx";
 import Destinations from "./pages/Destinations.jsx";
 import Reports from "./pages/Reports.jsx";
-import Misc from "./pages/Misc.jsx";
+import Varios from "./pages/Varios.jsx";
 import Header from "./tags/Header.jsx";
 import Footer from "./tags/Footer.jsx";
 
-const router = createBrowserRouter([
-  { path: "/", element: <Home /> },
-  { path: "/docs", element: <Documents /> },
-  { path: "/clients", element: <Clients /> },
-  { path: "/destinations", element: <Destinations /> },
-  { path: "/reports", element: <Reports /> },
-  { path: "/misc", element: <Misc /> },
-]);
-
-function App() {
+function Layout() {
   return (
     <>
       <Header />
-      <RouterProvider router={router} />
+      <Outlet />
       <Footer />
     </>
   );
+}
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />, 
+    children: [
+      { path: '', element: <Home /> },
+      { path: 'docs', element: <Documents /> },
+      { path: 'clients', element: <Clients /> },
+      { path: 'destinations', element: <Destinations /> },
+      { path: 'reports', element: <Reports /> },
+      { path: 'varios', element: <Varios /> },
+    ]
+  }
+]);
+
+
+function App() {
+  return <RouterProvider router={router} />;
 }
 
 export default App;
