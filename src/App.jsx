@@ -11,11 +11,13 @@ import Footer from "./tags/Footer.jsx";
 
 function Layout() {
   return (
-    <>
+    <div>
       <Header />
-      <Outlet />
+      <main>
+        <Outlet />
+      </main>
       <Footer />
-    </>
+    </div>
   );
 }
 
@@ -33,7 +35,6 @@ const router = createBrowserRouter([
     ]
   }
 ]);
-
 
 function App() {
   return <RouterProvider router={router} />;

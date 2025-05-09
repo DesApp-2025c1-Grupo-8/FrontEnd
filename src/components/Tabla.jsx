@@ -15,7 +15,7 @@ import Stack from '@mui/material/Stack';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 
-function TableVarios({ datos = [], onSearch, onEdit, onDelete }) {
+function Tabla({ datos = [], onSearch, onEdit, onDelete }) {
   const [cantidad, setCantidad] = useState(10);
   const [pagina, setPagina] = useState(1);
 
@@ -62,7 +62,7 @@ function TableVarios({ datos = [], onSearch, onEdit, onDelete }) {
           >
             <TableCell>ID</TableCell>
             <TableCell>Nombre</TableCell>
-            <TableCell>Desc corta</TableCell>
+            <TableCell>Descripción</TableCell>
             {tieneEstado && <TableCell>Estado</TableCell>}
             <TableCell>Acciones</TableCell>
           </TableRow>
@@ -119,4 +119,4 @@ function TableVarios({ datos = [], onSearch, onEdit, onDelete }) {
   );
 }
 
-export default TableVarios;
+export default Tabla;

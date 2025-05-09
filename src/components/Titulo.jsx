@@ -1,5 +1,4 @@
 import { styled } from '@mui/material';
-import React from 'react';
 
 const Titulo = styled("h2")({
   fontSize: '2.5rem',
