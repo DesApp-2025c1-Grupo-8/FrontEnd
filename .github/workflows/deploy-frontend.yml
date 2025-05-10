@@ -19,20 +19,20 @@ jobs:
         node-version: '20'
         
     - name: Crear carpeta de destino si no existe
-      run: mkdir -p ~/deploy/desapps25c1/frontend
+      run: mkdir -p /home/daamiale/deploy/desapps25c1/frontend
 
     - name: Limpiar destino anterior
-      run: rm -rf ~/deploy/desapps25c1/frontend/*
+      run: rm -rf /home/daamiale/deploy/desapps25c1/frontend/*
 
     - name: Copiar todo el repo a la carpeta destino
-      run: cp -r . ~/deploy/desapps25c1/frontend/
+      run: cp -r . /home/daamiale/deploy/desapps25c1/frontend/
 
     - name: Instalar dependencias
-      working-directory: ~/deploy/desapps25c1/frontend
+      working-directory: /home/daamiale/deploy/desapps25c1/frontend
       run: npm ci
 
     - name: Compilar proyecto (Vite)
-      working-directory: ~/deploy/desapps25c1/frontend
+      working-directory: /home/daamiale/deploy/desapps25c1/frontend
       run: npm run build
 
     - name: Reiniciar Frontend service
