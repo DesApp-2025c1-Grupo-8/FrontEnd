@@ -1,7 +1,7 @@
-import WebAPI from './config/WebAPI.js';
+ï»¿import WebAPI from './config/WebAPI.js';
 
 class BaseService {
-    // Ejemplo de uso básico de llamada simple a BE
+    // Ejemplo de uso bÃ¡sico de llamada simple a BE
     async getRandom() {
         try {
             const response = await WebAPI.Instance().get('/testingCommonFunctions');
@@ -16,4 +16,4 @@ class BaseService {
     }
 
 }
-export default new BaseService();// Instancia única de la clase BaseService (Singleton)
+export default new BaseService();// Instancia Ãºnica de la clase BaseService (Singleton)

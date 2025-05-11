@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
 class WebAPI {
     constructor() {
@@ -18,5 +18,5 @@ class WebAPI {
         return this._axiosInstance;
     }
 }
-export default new WebAPI(); // Instancia �nica de la clase Api (Singleton)
+export default new WebAPI(); // Instancia única de la clase Api (Singleton)
 // Ejemplo de uso en BaseService
