@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-export default class Api {
-    static AxiosInstance(){
+class Api {
+    AxiosInstance(){
         return axios.create({
             baseURL: 'http://localhost:5000', // URL de API
             timeout: 10000, // 10 segundos
@@ -12,5 +12,5 @@ export default class Api {
         });
     }
 }
-
+export default new Api(); // Instancia única de la clase Api (Singleton)
 // Ejemplo de uso en BaseService
