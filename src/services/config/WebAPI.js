@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-class Api {
+class WebAPI {
     constructor() {
         this._axiosInstance = null; // Variable privada para almacenar la instancia de Axios
     }
-    AxiosInstance() {
+    Instance() {
         if (!this._axiosInstance) {
             this._axiosInstance = axios.create({
                 baseURL: 'http://localhost:5000', // URL de API
@@ -18,5 +18,5 @@ class Api {
         return this._axiosInstance;
     }
 }
-export default new Api(); // Instancia única de la clase Api (Singleton)
+export default new WebAPI(); // Instancia única de la clase Api (Singleton)
 // Ejemplo de uso en BaseService

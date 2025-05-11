@@ -1,10 +1,10 @@
-import WebApi from './config/Api.js';
+import WebAPI from './config/WebAPI.js';
 
 class BaseService {
     // Ejemplo de uso básico de llamada simple a BE
     async getRandom() {
         try {
-            const response = await WebApi.AxiosInstance().get('/testingCommonFunctions');
+            const response = await WebAPI.Instance().get('/testingCommonFunctions');
             //throw new Error('Simulando un error en el backend');
             return { data: response.data, error: null };
         } catch (error) {
