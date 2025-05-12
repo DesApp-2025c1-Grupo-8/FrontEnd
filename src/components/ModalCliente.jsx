@@ -48,6 +48,7 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
   // Estado interno para los campos y el modo visual
   const [form, setForm] = useState(camposIniciales);
   const [errores, setErrores] = useState({});
+  const [mensajesError, setMensajesError] = useState({});
   const [modoInterno, setModoInterno] = useState(modo); // 'alta', 'consulta', 'modificacion'
 
   useEffect(() => {
@@ -68,12 +69,36 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
 
   const validar = () => {
     const nuevosErrores = {};
+    const mensajesError = {};
+
+    // Validación de campos obligatorios
     camposObligatorios.forEach((campo) => {
       if (!form[campo] || form[campo].toString().trim() === '') {
         nuevosErrores[campo] = true;
+        // No agregamos mensaje de error para campos obligatorios vacíos
       }
     });
+
+    // Validación de CUIT/RUT (formato XX-XXXXXXXX-X para CUIT o XX.XXX.XXX-X para RUT)
+    if (form.cuit && !/^\d{2}-\d{8}-\d{1}$/.test(form.cuit) && !/^\d{2}\.\d{3}\.\d{3}-\d{1}$/.test(form.cuit)) {
+      nuevosErrores.cuit = true;
+      mensajesError.cuit = 'El CUIT debe tener formato XX-XXXXXXXX-X o el RUT formato XX.XXX.XXX-X';
+    }
+
+    // Validación de email
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      nuevosErrores.email = true;
+      mensajesError.email = 'Ingrese un email válido';
+    }
+
+    // Validación de teléfono (solo números)
+    if (form.telefono && !/^\d+$/.test(form.telefono)) {
+      nuevosErrores.telefono = true;
+      mensajesError.telefono = 'El teléfono debe contener solo números';
+    }
+
     setErrores(nuevosErrores);
+    setMensajesError(mensajesError);
     return Object.keys(nuevosErrores).length === 0;
   };
 
@@ -157,6 +182,7 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
                     fullWidth
                     disabled={!camposEditables}
                     error={!!errores.cuit}
+                    helperText={mensajesError.cuit}
                     size="small"
                   />
                   {errores.cuit && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
@@ -209,6 +235,7 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
                     fullWidth
                     disabled={!camposEditables}
                     error={!!errores.telefono}
+                    helperText={mensajesError.telefono}
                     size="small"
                   />
                   {errores.telefono && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
@@ -224,6 +251,7 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
                     fullWidth
                     disabled={!camposEditables}
                     error={!!errores.email}
+                    helperText={mensajesError.email}
                     size="small"
                   />
                   {errores.email && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}

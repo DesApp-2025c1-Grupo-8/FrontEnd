@@ -42,6 +42,7 @@ const camposIniciales = {
 function ModalDestino({ open, onClose, modo = 'alta', destino = null }) {
   const [form, setForm] = useState(camposIniciales);
   const [errores, setErrores] = useState({});
+  const [mensajesError, setMensajesError] = useState({});
   const [modoInterno, setModoInterno] = useState(modo);
 
   useEffect(() => {
@@ -62,12 +63,36 @@ function ModalDestino({ open, onClose, modo = 'alta', destino = null }) {
 
   const validar = () => {
     const nuevosErrores = {};
+    const mensajesError = {};
+
+    // Validación de campos obligatorios
     camposObligatorios.forEach((campo) => {
       if (!form[campo] || form[campo].toString().trim() === '') {
         nuevosErrores[campo] = true;
+        // No agregamos mensaje de error para campos obligatorios vacíos
       }
     });
+
+    // Validación de altura (solo números)
+    if (form.altura && !/^\d+$/.test(form.altura)) {
+      nuevosErrores.altura = true;
+      mensajesError.altura = 'La altura debe contener solo números';
+    }
+
+    // Validación de teléfono (solo números)
+    if (form.telefono && !/^\d+$/.test(form.telefono)) {
+      nuevosErrores.telefono = true;
+      mensajesError.telefono = 'El teléfono debe contener solo números';
+    }
+
+    // Validación de email
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      nuevosErrores.email = true;
+      mensajesError.email = 'Ingrese un email válido';
+    }
+
     setErrores(nuevosErrores);
+    setMensajesError(mensajesError);
     return Object.keys(nuevosErrores).length === 0;
   };
 
@@ -209,6 +234,7 @@ function ModalDestino({ open, onClose, modo = 'alta', destino = null }) {
                     fullWidth
                     disabled={!camposEditables}
                     error={!!errores.altura}
+                    helperText={mensajesError.altura}
                     size="small"
                   />
                   {errores.altura && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
@@ -224,6 +250,7 @@ function ModalDestino({ open, onClose, modo = 'alta', destino = null }) {
                     fullWidth
                     disabled={!camposEditables}
                     error={!!errores.telefono}
+                    helperText={mensajesError.telefono}
                     size="small"
                   />
                   {errores.telefono && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
@@ -239,6 +266,7 @@ function ModalDestino({ open, onClose, modo = 'alta', destino = null }) {
                     fullWidth
                     disabled={!camposEditables}
                     error={!!errores.email}
+                    helperText={mensajesError.email}
                     size="small"
                   />
                   {errores.email && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
