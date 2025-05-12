@@ -4,10 +4,10 @@ import {
   InputAdornment,
   TextField,
   Typography,
-  InputBase
+  InputBase,
 } from "@mui/material";
 
-import { styled } from '@mui/material/styles';
+import { styled } from "@mui/material/styles";
 
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
@@ -28,17 +28,17 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  width: '100%',
-  '& .MuiInputBase-input': {
+  color: "inherit",
+  width: "100%",
+  "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
     // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    [theme.breakpoints.up('sm')]: {
-      width: '12ch',
-      '&:focus': {
-        width: '20ch',
+    transition: theme.transitions.create("width"),
+    [theme.breakpoints.up("sm")]: {
+      width: "12ch",
+      "&:focus": {
+        width: "20ch",
       },
     },
   },
@@ -53,13 +53,18 @@ function Clients() {
           flexDirection: "column",
           backgroundColor: "#F4FFF8",
         }}
+        gap={2}
       >
         <Box>
           <Typography
             variant="h2"
-            sx={{ color: "black", borderBottom: "3px solid #4D4847" }}
+            sx={{
+              color: "black",
+              borderBottom: "3px solid #4D4847",
+              width: "fit-content",
+            }}
           >
-            Clientes
+            Gestión de Clientes
           </Typography>
         </Box>
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -67,6 +72,7 @@ function Clients() {
             sx={{
               display: "flex",
             }}
+            gap={5}
           >
             <SearchBar />
             <Button variant="contained" startIcon={<SearchIcon />}>
