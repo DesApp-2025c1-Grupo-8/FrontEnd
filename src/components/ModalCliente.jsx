@@ -75,7 +75,6 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
     camposObligatorios.forEach((campo) => {
       if (!form[campo] || form[campo].toString().trim() === '') {
         nuevosErrores[campo] = true;
-        // No agregamos mensaje de error para campos obligatorios vacíos
       }
     });
 
