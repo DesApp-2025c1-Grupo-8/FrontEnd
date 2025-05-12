@@ -1,0 +1,39 @@
+name: Deploy Frontend to TheTeleporter
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: [self-hosted, Linux, X64]
+    name: Frontend Deployment
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        
+    - name: Crear carpeta de destino si no existe
+      run: mkdir -p /home/daamiale/deploy/desapps25c1/frontend
+
+    - name: Limpiar destino anterior
+      run: rm -rf /home/daamiale/deploy/desapps25c1/frontend/*
+
+    - name: Copiar todo el repo a la carpeta destino
+      run: rsync -av --exclude='.git' ./ /home/daamiale/deploy/desapps25c1/frontend/
+
+    - name: Instalar dependencias
+      working-directory: /home/daamiale/deploy/desapps25c1/frontend
+      run: npm ci
+
+    - name: Compilar proyecto (Vite)
+      working-directory: /home/daamiale/deploy/desapps25c1/frontend
+      run: npm run build
+
+    - name: Reiniciar Frontend service
+      run: sudo systemctl restart desapps25c1-front.service
