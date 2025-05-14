@@ -1,35 +1,44 @@
 import React, { useState } from 'react';
 import ModalDestino from '../components/ModalDestino';
+// Importaciones de componentes de Material-UI
 import { 
-  Box, 
-  Button, 
-  Container, 
-  Stack,
-  useTheme,
-  useMediaQuery
+  Box,              // Contenedor flexible para layout
+  Button,           // Componente de botón
+  Container,        // Contenedor con márgenes automáticos
+  Stack,            // Contenedor con espaciado entre elementos
+  useTheme,         // Hook para acceder al tema de Material-UI
+  useMediaQuery     // Hook para diseño responsive
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 
+// Íconos de Material-UI
+import AddIcon from '@mui/icons-material/Add';           // Ícono de agregar
+import EditIcon from '@mui/icons-material/Edit';         // Ícono de editar
+import VisibilityIcon from '@mui/icons-material/Visibility'; // Ícono de ver
+
+// Datos de ejemplo para un destino
 const destinoEjemplo = {
   nombre: 'Destino Demo',
-  localidad: 'Ciudad Demo',
-  provincia: 'Provincia Demo',
-  pais: 'País Demo',
+  continente: 'América',
+  pais: 'Argentina',
+  provincia: 'Buenos Aires',
+  municipio: 'La Plata',
   calle: 'Calle Falsa',
   altura: '123',
   telefono: '123456789',
   email: 'demo@destino.com',
 };
 
-function Destinations() {
-  const [open, setOpen] = useState(false);
-  const [modo, setModo] = useState('alta');
-  const [destino, setDestino] = useState(null);
+export default function Destinations() {
+  // Estados para controlar el modal
+  const [open, setOpen] = useState(false);        // Controla si el modal está abierto
+  const [modo, setModo] = useState('alta');      // Modo del modal (alta, modificación, consulta)
+  const [destino, setDestino] = useState(null);  // Datos del destino seleccionado
+  
+  // Hooks para responsive design
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // Funciones para abrir el modal en diferentes modos
   const abrirAlta = () => {
     setModo('alta');
     setDestino(null);
@@ -48,9 +57,11 @@ function Destinations() {
     setOpen(true);
   };
 
+  // Renderizado de la página
   return (
     <Container maxWidth="lg">
       <Box sx={{ py: 3 }}>
+        {/* Stack de botones */}
         <Stack 
           direction={isMobile ? "column" : "row"} 
           spacing={2}
@@ -59,6 +70,7 @@ function Destinations() {
             width: '100%'
           }}
         >
+          {/* Botón Nuevo Destino */}
           <Button
             variant="contained"
             color="primary"
@@ -69,6 +81,8 @@ function Destinations() {
           >
             Nuevo Destino
           </Button>
+
+          {/* Botón Editar Destino */}
           <Button
             variant="outlined"
             color="primary"
@@ -79,6 +93,8 @@ function Destinations() {
           >
             Editar Destino
           </Button>
+
+          {/* Botón Consultar Destino */}
           <Button
             variant="outlined"
             color="primary"
@@ -91,6 +107,8 @@ function Destinations() {
           </Button>
         </Stack>
       </Box>
+      
+      {/* Modal de destino */}
       <ModalDestino
         open={open}
         onClose={() => setOpen(false)}
@@ -100,5 +118,3 @@ function Destinations() {
     </Container>
   );
 }
-
-export default Destinations;
