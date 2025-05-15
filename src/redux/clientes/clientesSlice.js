@@ -72,7 +72,7 @@ const clientesSlice = createSlice({
       state.lista.push(action.payload);
     },
     eliminarCliente(state, action) {
-      state.lista = state.lista.filter((c) => c.id !== action.payload);
+      state.lista = state.lista.filter((c) => c.IUC !== action.payload);
     },
     seleccionarCliente(state, action) {
       state.seleccionado = action.payload;

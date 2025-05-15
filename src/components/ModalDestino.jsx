@@ -1,9 +1,4 @@
-// Este componente maneja la creación, edición y visualización de información de destinos.
-// Permite tres modos de operación: alta (crear nuevo destino), modificación (editar destino existente)
-// y consulta (ver información del destino).
-
-import React, { useState, useEffect } from 'react';
-// Importaciones de componentes de Material-UI para la interfaz
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,362 +8,250 @@ import {
   Grid,
   Typography,
   Box,
-  Tooltip,
+  Autocomplete,
   Button,
-} from '@mui/material';
-// Importaciones de iconos de Material-UI
-import CloseIcon from '@mui/icons-material/Close';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from "@mui/icons-material/Save";
 
-// Lista de campos que son obligatorios para el registro de un destino
-const camposObligatorios = [
-  'nombre',
-  'continente',
-  'pais',
-  'provincia',
-  'municipio',
-  'calle',
-  'altura',
-  'telefono',
-  'email',
-];
-
-// Valores iniciales para el formulario de destino
 const camposIniciales = {
-  nombre: '',
-  continente: '',
-  pais: '',
-  provincia: '',
-  municipio: '',
-  calle: '',
-  altura: '',
-  telefono: '',
-  email: '',
+  nombre: "",
+  calle: "",
+  altura: "",
+  municipio: "",
+  localidad: "",
+  codigo_postal: "",
+  provincia: "",
+  pais: "",
 };
 
-function ModalDestino({ open, onClose, modo = 'alta', destino = null }) {
-  // Estados del componente
-  const [form, setForm] = useState(camposIniciales); // Estado del formulario
-  const [errores, setErrores] = useState({}); // Estado de errores de validación
-  const [mensajesError, setMensajesError] = useState({}); // Mensajes de error específicos
-  const [modoInterno, setModoInterno] = useState(modo); // Modo interno del modal
+const ModalDestino = ({ open, onClose }) => {
+  const [form, setForm] = useState(camposIniciales);
+  const [direccionInput, setDireccionInput] = useState("");
+  const [sugerencias, setSugerencias] = useState([]);
+  const [openAutocomplete, setOpenAutocomplete] = useState(false);
 
-  // Efecto que se ejecuta cuando cambia el modo o se abre el modal
-  useEffect(() => {
-    if (modo === 'alta') {
-      setForm(camposIniciales);
-      setModoInterno('alta');
-    } else if (destino) {
-      setForm({ ...destino });
-      setModoInterno(modo);
+  const buscarDireccion = () => {
+    if (direccionInput.length < 3) {
+      setSugerencias([]);
+      setOpenAutocomplete(false);
+      return;
     }
-    setErrores({});
-  }, [open, modo, destino]);
 
-  // Maneja los cambios en los campos del formulario
-  const handleChange = (e) => {
+    fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=ar&q=${encodeURIComponent(
+        direccionInput
+      )}`,
+      { headers: { "Accept-Language": "es" } }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setSugerencias(data);
+        setOpenAutocomplete(true);
+      })
+      .catch(() => {});
+  };
+
+  const handleSeleccionDireccion = (option) => {
+    if (!option || !option.address) return;
+    const address = option.address;
+
+    setForm((prev) => ({
+      ...prev,
+      calle: address.road || "",
+      altura: address.house_number || "",
+      municipio: address.state_district || address.village || "",
+      localidad: address.town || address.city || "",
+      codigo_postal: address.postcode || "",
+      provincia: address.state || "",
+      pais: address.country || "",
+    }));
+
+    setDireccionInput(option.display_name);
+  };
+
+  const handleChangeCampo = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Valida todos los campos del formulario según las reglas de negocio
-  const validar = () => {
-    const nuevosErrores = {};
-    const mensajesError = {};
-
-    // Validación de campos obligatorios
-    camposObligatorios.forEach((campo) => {
-      if (!form[campo] || form[campo].toString().trim() === '') {
-        nuevosErrores[campo] = true;
-      }
-    });
-
-    // Validación de altura (solo números)
-    if (form.altura && !/^\d+$/.test(form.altura)) {
-      nuevosErrores.altura = true;
-      mensajesError.altura = 'La altura debe contener solo números';
-    }
-
-    // Validación de teléfono (solo números)
-    if (form.telefono && !/^\d+$/.test(form.telefono)) {
-      nuevosErrores.telefono = true;
-      mensajesError.telefono = 'El teléfono debe contener solo números';
-    }
-
-    // Validación de email
-    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      nuevosErrores.email = true;
-      mensajesError.email = 'Ingrese un email válido';
-    }
-
-    // Validación de continente (letras, espacios)
-    if (form.continente && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.]+$/.test(form.continente)) {
-      nuevosErrores.continente = true;
-      mensajesError.continente = 'El continente debe contener solo letras';
-    }
-
-    // Validación de país (letras, espacios)
-    if (form.pais && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.]+$/.test(form.pais)) {
-      nuevosErrores.pais = true;
-      mensajesError.pais = 'El país debe contener solo letras';
-    }
-
-    // Validación de provincia (letras, espacios)
-    if (form.provincia && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.]+$/.test(form.provincia)) {
-      nuevosErrores.provincia = true;
-      mensajesError.provincia = 'La provincia debe contener solo letras';
-    }
-
-    // Validación de municipio (letras, espacios)
-    if (form.municipio && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.]+$/.test(form.municipio)) {
-      nuevosErrores.municipio = true;
-      mensajesError.municipio = 'El municipio debe contener solo letras';
-    }
-
-    // Validación de calle (letras, números, espacios)
-    if (form.calle && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.]+$/.test(form.calle)) {
-      nuevosErrores.calle = true;
-      mensajesError.calle = 'La calle debe contener solo letras y/o números';
-    }
-
-    setErrores(nuevosErrores);
-    setMensajesError(mensajesError);
-    return Object.keys(nuevosErrores).length === 0;
-  };
-
-  // Maneja el guardado del formulario
   const handleGuardar = () => {
-    validar(); // Solo validación visual
+    console.log("Destino guardado:", form);
   };
 
-  // Cambia el modo del modal a 'modificacion'
-  const handleEditar = () => {
-    setModoInterno('modificacion');
-  };
-
-  // Maneja la eliminación del destino
-  const handleEliminar = () => {
-    // Solo visual
-  };
-
-  // Determina si los campos son editables según el modo
-  const camposEditables = modoInterno === 'alta' || modoInterno === 'modificacion';
-
-  const getTitulo = () => {
-    if (modoInterno === 'alta') return 'Nuevo Destino';
-    if (modoInterno === 'modificacion') return 'Editar Destino';
-    return 'Información del Destino';
-  };
-
-  // Renderizado del componente
   return (
-    // Modal principal que contiene el formulario
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      {/* Contenedor principal con borde y estilo */}
-      <Box sx={{ border: '3px solid #0097a7', borderRadius: 3, m: 1, position: 'relative' }}>
-        {/* Encabezado del modal con título y botones de acción */}
-        <DialogTitle sx={{ pb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h5" fontWeight="bold">{getTitulo()}</Typography>
-          <Box>
-            {/* Botones de editar y eliminar solo visibles en modo consulta */}
-            {modoInterno === 'consulta' && (
-              <>
-                <Tooltip title="Editar">
-                  <IconButton onClick={handleEditar}>
-                    <EditIcon color="primary" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Eliminar">
-                  <IconButton onClick={handleEliminar}>
-                    <DeleteIcon color="error" />
-                  </IconButton>
-                </Tooltip>
-              </>
-            )}
-            {/* Botón para cerrar el modal */}
-            <Tooltip title="Cerrar">
-              <IconButton onClick={onClose}>
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
+      <Box sx={{ border: "3px solid #0097a7", borderRadius: 3, m: 1 }}>
+        <DialogTitle
+          sx={{
+            pb: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold">
+            Nuevo Destino
+          </Typography>
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
-        {/* Contenido principal del modal */}
         <DialogContent>
-          {/* Sección de información del destino */}
-          <Box sx={{ border: '1px solid #b2ebf2', borderRadius: 2, p: 2, mt: 2 }}>
-            <Typography variant="subtitle1" sx={{ color: '#0097a7', fontWeight: 'bold', mb: 2, borderBottom: '2px solid #b2ebf2' }}>
+          <Box
+            sx={{ border: "1px solid #b2ebf2", borderRadius: 2, p: 2, mt: 2 }}
+          >
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: "#0097a7",
+                fontWeight: "bold",
+                mb: 2,
+                borderBottom: "2px solid #b2ebf2",
+              }}
+            >
               Información del destino
             </Typography>
-            {/* Grid de campos del formulario */}
-            <Grid container spacing={2} alignItems="center">
-              {/* Campo Nombre del Destino */}
+            <Grid container spacing={2}>
+              {/* Fila 1: nombre */}
               <Grid item xs={12}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Nombre del Destino"
-                    name="nombre"
-                    value={form.nombre}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.nombre}
-                    size="small"
-                  />
-                  {errores.nombre && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+                <TextField
+                  label="Nombre del destino"
+                  name="nombre"
+                  value={form.nombre}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  size="small"
+                />
               </Grid>
-              {/* Campos de ubicación geográfica */}
-              <Grid item xs={12} sm={4}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Continente"
-                    name="continente"
-                    value={form.continente}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.continente}
-                    helperText={mensajesError.continente}
-                    size="small"
-                  />
-                  {errores.continente && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+
+              {/* Fila 2: dirección autocomplete */}
+              <Grid item xs={12} sx={{ width: "100%" }}>
+                <Autocomplete
+                  freeSolo
+                  options={sugerencias}
+                  getOptionLabel={(option) =>
+                    typeof option === "string" ? option : option.display_name
+                  }
+                  inputValue={direccionInput}
+                  onInputChange={(e, newInputValue) =>
+                    setDireccionInput(newInputValue)
+                  }
+                  onChange={(e, newValue) => handleSeleccionDireccion(newValue)}
+                  open={openAutocomplete}
+                  onOpen={() => {
+                    if (sugerencias.length > 0) {
+                      setOpenAutocomplete(true);
+                    }
+                  }}
+                  onClose={() => setOpenAutocomplete(false)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Dirección (calle y altura)"
+                      size="small"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          buscarDireccion();
+                        }
+                      }}
+                    />
+                  )}
+                />
               </Grid>
+
+              {/* Fila 3: altura, municipio, localidad */}
               <Grid item xs={12} sm={4}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="País"
-                    name="pais"
-                    value={form.pais}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.pais}
-                    helperText={mensajesError.pais}
-                    size="small"
-                  />
-                  {errores.pais && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Provincia"
-                    name="provincia"
-                    value={form.provincia}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.provincia}
-                    helperText={mensajesError.provincia}
-                    size="small"
-                  />
-                  {errores.provincia && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+                <TextField
+                  label="Calle"
+                  name="calle"
+                  value={form.calle}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  size="small"
+                />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Municipio"
-                    name="municipio"
-                    value={form.municipio}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.municipio}
-                    helperText={mensajesError.municipio}
-                    size="small"
-                  />
-                  {errores.municipio && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={8}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Calle"
-                    name="calle"
-                    value={form.calle}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.calle}
-                    helperText={mensajesError.calle}
-                    size="small"
-                  />
-                  {errores.calle && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+                <TextField
+                  label="Altura"
+                  name="altura"
+                  value={form.altura}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  size="small"
+                />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Altura"
-                    name="altura"
-                    value={form.altura}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.altura}
-                    helperText={mensajesError.altura}
-                    size="small"
-                  />
-                  {errores.altura && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+                <TextField
+                  label="Municipio"
+                  name="municipio"
+                  value={form.municipio}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  size="small"
+                />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Teléfono"
-                    name="telefono"
-                    value={form.telefono}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.telefono}
-                    helperText={mensajesError.telefono}
-                    size="small"
-                  />
-                  {errores.telefono && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Localidad"
+                  name="localidad"
+                  value={form.localidad}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  size="small"
+                />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.email}
-                    helperText={mensajesError.email}
-                    size="small"
-                  />
-                  {errores.email && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+
+              {/* Fila 4: código postal, provincia, país */}
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Código Postal"
+                  name="codigo_postal"
+                  value={form.codigo_postal}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Provincia"
+                  name="provincia"
+                  value={form.provincia}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="País"
+                  name="pais"
+                  value={form.pais}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  size="small"
+                />
               </Grid>
             </Grid>
-          </Box>
-          {/* Botón de guardar (visible solo en modos alta y modificación) */}
-          {(modoInterno === 'alta' || modoInterno === 'modificacion') && (
-            <Box display="flex" justifyContent="flex-end" mt={2}>
+
+            {/* Botón guardar */}
+            <Box mt={3} display="flex" justifyContent="flex-end">
               <Button
                 variant="contained"
-                color="primary"
                 startIcon={<SaveIcon />}
                 onClick={handleGuardar}
+                color="primary"
               >
                 Guardar
               </Button>
             </Box>
-          )}
+          </Box>
         </DialogContent>
       </Box>
     </Dialog>
   );
-}
+};
 
-export default ModalDestino; 
+export default ModalDestino;

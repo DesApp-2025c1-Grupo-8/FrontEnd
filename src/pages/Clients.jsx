@@ -16,8 +16,8 @@ function Clients() {
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleCopy = (row) => alert(`Copiar cliente: ${row.id}`);
-  const handleDelete = (row) => alert(`Eliminar cliente: ${row.id}`);
+  const handleCopy = (row) => alert(`Copiar cliente: ${row.IUC}`);
+  const handleDelete = (row) => alert(`Eliminar cliente: ${row.IUC}`);
 
   const columnas = clientes.length > 0 ? Object.keys(clientes[0]) : [];
 
