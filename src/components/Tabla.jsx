@@ -14,6 +14,7 @@ import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Tooltip from '@mui/material/Tooltip';
 
 function Tabla({ datos = [], onSearch, onEdit, onDelete }) {
   const [cantidad, setCantidad] = useState(10);
@@ -69,22 +70,34 @@ function Tabla({ datos = [], onSearch, onEdit, onDelete }) {
         </TableHead>
         <TableBody>
           {datosPagina.map((item, idx) => (
-            <TableRow>
-              
+            <TableRow
+              key={idx}
+              sx={{
+                '&:hover': {
+                  backgroundColor: 'rgba(139, 170, 173, 0.1)',
+                },
+              }}
+            >
               <TableCell>{item.id}</TableCell>
               <TableCell>{item.nombre}</TableCell>
               <TableCell>{item.descripcion}</TableCell>
               {tieneEstado && <TableCell>{item.estado}</TableCell>}
               <TableCell>
-                <IconButton size="small" title="Ver" onClick={() => onSearch(item)}>
-                  <VisibilityIcon fontSize="inherit" />
-                </IconButton>
-                <IconButton size="small" title="Editar" onClick={() => onEdit(item)}>
-                  <EditIcon fontSize="inherit" />
-                </IconButton>
-                <IconButton size="small" title="Eliminar" onClick={() => onDelete(item)}>
-                  <DeleteIcon fontSize="inherit" />
-                </IconButton>
+                <Tooltip title="Ver">
+                  <IconButton size="small" onClick={() => onSearch(item)}>
+                    <VisibilityIcon fontSize="inherit" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Editar">
+                  <IconButton size="small" onClick={() => onEdit(item)}>
+                    <EditIcon fontSize="inherit" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Eliminar">
+                  <IconButton size="small" onClick={() => onDelete(item)}>
+                    <DeleteIcon fontSize="inherit" />
+                  </IconButton>
+                </Tooltip>
               </TableCell>
             </TableRow>
           ))}
