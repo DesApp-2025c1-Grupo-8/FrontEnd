@@ -13,7 +13,6 @@ import { selectReportes } from '../redux/reportes/reportesSlice';
 
 import TableComponent from '../components/TableComponent'; // Importar nuevo componente
 import ReporteDestacadoBox from '../components/ReporteDestacadoBox';
-import Titulo from '../components/Titulo';
 
 const reportesDestacados = [
   {
@@ -93,9 +92,8 @@ function Reports() {
         onDelete={handleDelete}
         ViewIconVisible={true}
         EditIconVisible={true}
-        CopyIconVisible={true}
         DeleteIconVisible={true}
-        DownloadIconVisible={false} // Si no usas descarga por ahora
+        DownloadIconVisible={true} // Si no usas descarga por ahora
       />
     </Box>
   );
