@@ -1,120 +1,125 @@
-import React, { useState } from 'react';
-import ModalDestino from '../components/ModalDestino';
-// Importaciones de componentes de Material-UI
-import { 
-  Box,              // Contenedor flexible para layout
-  Button,           // Componente de botón
-  Container,        // Contenedor con márgenes automáticos
-  Stack,            // Contenedor con espaciado entre elementos
-  useTheme,         // Hook para acceder al tema de Material-UI
-  useMediaQuery     // Hook para diseño responsive
-} from '@mui/material';
+import React, { useState, useMemo } from "react";
 
-// Íconos de Material-UI
-import AddIcon from '@mui/icons-material/Add';           // Ícono de agregar
-import EditIcon from '@mui/icons-material/Edit';         // Ícono de editar
-import VisibilityIcon from '@mui/icons-material/Visibility'; // Ícono de ver
+import { Box, Button, Typography } from "@mui/material";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import SearchIcon from "@mui/icons-material/Search";
 
-// Datos de ejemplo para un destino
-const destinoEjemplo = {
-  nombre: 'Destino Demo',
-  continente: 'América',
-  pais: 'Argentina',
-  provincia: 'Buenos Aires',
-  municipio: 'La Plata',
-  calle: 'Calle Falsa',
-  altura: '123',
-  telefono: '123456789',
-  email: 'demo@destino.com',
-};
+import { useSelector } from "react-redux";
+import { selectDestinos } from "../redux/destinos/destinosSlice";
 
-export default function Destinations() {
-  // Estados para controlar el modal
-  const [open, setOpen] = useState(false);        // Controla si el modal está abierto
-  const [modo, setModo] = useState('alta');      // Modo del modal (alta, modificación, consulta)
-  const [destino, setDestino] = useState(null);  // Datos del destino seleccionado
-  
-  // Hooks para responsive design
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+import ModalDestino from "../components/ModalDestino";
+import TableComponent from "../components/TableComponent";
+import SearchBar from "../components/SearchBar";
 
-  // Funciones para abrir el modal en diferentes modos
-  const abrirAlta = () => {
-    setModo('alta');
+function Destinations() {
+  const destinos = useSelector(selectDestinos);
+
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleCopy = (row) => alert(`Copiar destino: ${row.id}`);
+  const handleDelete = (row) => alert(`Eliminar destino: ${row.id}`);
+
+  const columnas = destinos.length > 0 ? Object.keys(destinos[0]) : [];
+
+  const clientesFiltrados = useMemo(() => {
+    if (!searchTerm) return destinos;
+
+    const lowerSearch = searchTerm.toLowerCase();
+    return destinos.filter((destino) =>
+      Object.values(destino).some((valor) =>
+        String(valor).toLowerCase().includes(lowerSearch)
+      )
+    );
+  }, [destinos, searchTerm]);
+
+  const handleBuscarClick = () => {
+    setSearchTerm(searchInput.trim());
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      setSearchTerm(searchInput.trim());
+    }
+  };
+
+  const [open, setOpen] = useState(false); // Controla si el modal está abierto
+  const [modo, setModo] = useState("alta"); // Modo del modal (alta, modificación, consulta)
+  const [destino, setDestino] = useState(null); // Datos del destino seleccionado
+
+  const handleAdd = () => {
+    setModo("alta");
     setDestino(null);
     setOpen(true);
   };
 
-  const abrirEdicion = () => {
-    setModo('modificacion');
+  const handleEdit = (destinoEjemplo) => {
+    setModo("modificacion");
     setDestino(destinoEjemplo);
     setOpen(true);
   };
 
-  const abrirConsulta = () => {
-    setModo('consulta');
+  const handleView = (destinoEjemplo) => {
+    setModo("consulta");
     setDestino(destinoEjemplo);
     setOpen(true);
   };
 
-  // Renderizado de la página
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 3 }}>
-        {/* Stack de botones */}
-        <Stack 
-          direction={isMobile ? "column" : "row"} 
-          spacing={2}
-          sx={{ 
-            justifyContent: { xs: 'stretch', sm: 'flex-start' },
-            width: '100%'
-          }}
-        >
-          {/* Botón Nuevo Destino */}
+    <Box display="flex" flexDirection="column" gap={2} bgcolor="#F4FFF8">
+      <Typography
+        variant="h2"
+        sx={{
+          color: "black",
+          borderBottom: "3px solid #4D4847",
+          width: "fit-content",
+        }}
+      >
+        Gestión de Destinos
+      </Typography>
+
+      <Box display="flex" justifyContent="space-between">
+        <Box display="flex" gap={2}>
+          <SearchBar
+            placeholder="Buscar cliente"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
           <Button
             variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={abrirAlta}
-            fullWidth={isMobile}
-            sx={{ textTransform: 'none' }}
+            startIcon={<SearchIcon />}
+            onClick={handleBuscarClick}
           >
-            Nuevo Destino
+            Buscar
           </Button>
+        </Box>
 
-          {/* Botón Editar Destino */}
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<EditIcon />}
-            onClick={abrirEdicion}
-            fullWidth={isMobile}
-            sx={{ textTransform: 'none' }}
-          >
-            Editar Destino
-          </Button>
-
-          {/* Botón Consultar Destino */}
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<VisibilityIcon />}
-            onClick={abrirConsulta}
-            fullWidth={isMobile}
-            sx={{ textTransform: 'none' }}
-          >
-            Consultar Destino
-          </Button>
-        </Stack>
+        <Button
+          variant="contained"
+          startIcon={<PersonAddIcon />}
+          onClick={handleAdd}
+        >
+          Nuevo Destino
+        </Button>
       </Box>
-      
-      {/* Modal de destino */}
+
+      <TableComponent
+        columnas={columnas}
+        filas={clientesFiltrados}
+        onView={handleView}
+        onEdit={handleEdit}
+        onCopy={handleCopy}
+        onDelete={handleDelete}
+      />
       <ModalDestino
         open={open}
         onClose={() => setOpen(false)}
         modo={modo}
         destino={destino}
       />
-    </Container>
+    </Box>
   );
 }
+
+export default Destinations;
