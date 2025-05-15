@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,11 +25,35 @@ const camposIniciales = {
   pais: "",
 };
 
-const ModalDestino = ({ open, onClose }) => {
+const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
   const [form, setForm] = useState(camposIniciales);
   const [direccionInput, setDireccionInput] = useState("");
   const [sugerencias, setSugerencias] = useState([]);
   const [openAutocomplete, setOpenAutocomplete] = useState(false);
+
+  // Cuando cambia el destino o el modo, actualizar form
+  useEffect(() => {
+    if (modo === "alta" || !destino) {
+      setForm(camposIniciales);
+      setDireccionInput("");
+    } else {
+      // Cargar los datos del destino seleccionado
+      setForm({
+        nombre: destino.nombre || "",
+        calle: destino.calle || "",
+        altura: destino.altura || "",
+        municipio: destino.municipio || "",
+        localidad: destino.localidad || "",
+        codigo_postal: destino.codigo_postal || "",
+        provincia: destino.provincia || "",
+        pais: destino.pais || "",
+      });
+      // Si quieres, puedes inicializar direcciónInput con la calle + altura
+      setDireccionInput(
+        `${destino.calle || ""} ${destino.altura || ""}`.trim()
+      );
+    }
+  }, [modo, destino]);
 
   const buscarDireccion = () => {
     if (direccionInput.length < 3) {
@@ -77,7 +101,11 @@ const ModalDestino = ({ open, onClose }) => {
 
   const handleGuardar = () => {
     console.log("Destino guardado:", form);
+    // Aquí puedes agregar lógica para guardar o actualizar según modo
+    onClose();
   };
+
+  const esConsulta = modo === "consulta";
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -91,7 +119,11 @@ const ModalDestino = ({ open, onClose }) => {
           }}
         >
           <Typography variant="h5" fontWeight="bold">
-            Nuevo Destino
+            {modo === "alta"
+              ? "Nuevo Destino"
+              : modo === "modificacion"
+              ? "Editar Destino"
+              : "Detalle del Destino"}
           </Typography>
           <IconButton onClick={onClose}>
             <CloseIcon />
@@ -122,6 +154,7 @@ const ModalDestino = ({ open, onClose }) => {
                   onChange={handleChangeCampo}
                   fullWidth
                   size="small"
+                  disabled={esConsulta}
                 />
               </Grid>
 
@@ -135,9 +168,11 @@ const ModalDestino = ({ open, onClose }) => {
                   }
                   inputValue={direccionInput}
                   onInputChange={(e, newInputValue) =>
-                    setDireccionInput(newInputValue)
+                    !esConsulta && setDireccionInput(newInputValue)
                   }
-                  onChange={(e, newValue) => handleSeleccionDireccion(newValue)}
+                  onChange={(e, newValue) =>
+                    !esConsulta && handleSeleccionDireccion(newValue)
+                  }
                   open={openAutocomplete}
                   onOpen={() => {
                     if (sugerencias.length > 0) {
@@ -148,14 +183,15 @@ const ModalDestino = ({ open, onClose }) => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Dirección (calle y altura)"
+                      label="Buscador de dirección"
                       size="small"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
-                          buscarDireccion();
+                          if (!esConsulta) buscarDireccion();
                         }
                       }}
+                      disabled={esConsulta}
                     />
                   )}
                 />
@@ -170,6 +206,7 @@ const ModalDestino = ({ open, onClose }) => {
                   onChange={handleChangeCampo}
                   fullWidth
                   size="small"
+                  disabled={esConsulta}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -180,6 +217,7 @@ const ModalDestino = ({ open, onClose }) => {
                   onChange={handleChangeCampo}
                   fullWidth
                   size="small"
+                  disabled={esConsulta}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -190,6 +228,7 @@ const ModalDestino = ({ open, onClose }) => {
                   onChange={handleChangeCampo}
                   fullWidth
                   size="small"
+                  disabled={esConsulta}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -200,6 +239,7 @@ const ModalDestino = ({ open, onClose }) => {
                   onChange={handleChangeCampo}
                   fullWidth
                   size="small"
+                  disabled={esConsulta}
                 />
               </Grid>
 
@@ -212,6 +252,7 @@ const ModalDestino = ({ open, onClose }) => {
                   onChange={handleChangeCampo}
                   fullWidth
                   size="small"
+                  disabled={esConsulta}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -222,6 +263,7 @@ const ModalDestino = ({ open, onClose }) => {
                   onChange={handleChangeCampo}
                   fullWidth
                   size="small"
+                  disabled={esConsulta}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -232,21 +274,24 @@ const ModalDestino = ({ open, onClose }) => {
                   onChange={handleChangeCampo}
                   fullWidth
                   size="small"
+                  disabled={esConsulta}
                 />
               </Grid>
             </Grid>
 
-            {/* Botón guardar */}
-            <Box mt={3} display="flex" justifyContent="flex-end">
-              <Button
-                variant="contained"
-                startIcon={<SaveIcon />}
-                onClick={handleGuardar}
-                color="primary"
-              >
-                Guardar
-              </Button>
-            </Box>
+            {/* Botón guardar (oculto si es modo consulta) */}
+            {!esConsulta && (
+              <Box mt={3} display="flex" justifyContent="flex-end">
+                <Button
+                  variant="contained"
+                  startIcon={<SaveIcon />}
+                  onClick={handleGuardar}
+                  color="primary"
+                >
+                  Guardar
+                </Button>
+              </Box>
+            )}
           </Box>
         </DialogContent>
       </Box>
