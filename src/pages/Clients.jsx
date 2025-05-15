@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, Container, Stack } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
 
 import { useSelector } from "react-redux";
 import { selectClientes } from "../redux/clientes/clientesSlice";
 
+import ModalCliente from "../components/ModalCliente";
 import TableComponent from "../components/TableComponent";
 import SearchBar from "../components/SearchBar";
 
@@ -15,14 +16,11 @@ function Clients() {
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleView = (row) => alert(`Ver cliente: ${row.id}`);
-  const handleEdit = (row) => alert(`Editar cliente: ${row.id}`);
   const handleCopy = (row) => alert(`Copiar cliente: ${row.id}`);
   const handleDelete = (row) => alert(`Eliminar cliente: ${row.id}`);
 
   const columnas = clientes.length > 0 ? Object.keys(clientes[0]) : [];
 
-  // 🔍 Solo filtra cuando searchTerm cambia
   const clientesFiltrados = useMemo(() => {
     if (!searchTerm) return clientes;
 
@@ -44,6 +42,27 @@ function Clients() {
     }
   };
 
+  const [open, setOpen] = useState(false); // Controla si el modal está abierto
+  const [modo, setModo] = useState("alta"); // Modo del modal (alta, modificación, consulta)
+  const [cliente, setCliente] = useState(null); // Datos del cliente seleccionado
+
+  const handleAdd = () => {
+    setModo("alta");
+    setCliente(null);
+    setOpen(true);
+  };
+
+  const handleEdit = (clienteSeleccionado) => {
+    setModo("modificacion");
+    setCliente(clienteSeleccionado);
+    setOpen(true);
+  };
+
+  const handleView = (clienteSeleccionado) => {
+    setModo("consulta");
+    setCliente(clienteSeleccionado);
+    setOpen(true);
+  };
 
   return (
     <Box display="flex" flexDirection="column" gap={2} bgcolor="#F4FFF8">
@@ -75,7 +94,11 @@ function Clients() {
           </Button>
         </Box>
 
-        <Button variant="contained" startIcon={<PersonAddIcon />}>
+        <Button
+          variant="contained"
+          startIcon={<PersonAddIcon />}
+          onClick={handleAdd}
+        >
           Nuevo Cliente
         </Button>
       </Box>
@@ -87,6 +110,12 @@ function Clients() {
         onEdit={handleEdit}
         onCopy={handleCopy}
         onDelete={handleDelete}
+      />
+      <ModalCliente
+        open={open}
+        onClose={() => setOpen(false)}
+        modo={modo}
+        cliente={cliente}
       />
     </Box>
   );
