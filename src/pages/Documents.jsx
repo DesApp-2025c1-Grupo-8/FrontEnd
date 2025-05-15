@@ -19,6 +19,7 @@ function Documents() {
 
   const handleCopy = (row) => alert(`Copiar remito: ${row.id}`);
   const handleDelete = (row) => alert(`Eliminar remito: ${row.id}`);
+  const handleDownload = (row) => alert(`Descargar remito: ${row.id}`);
 
   const columnas = remitos.length > 0 ? Object.keys(remitos[0]) : [];
 
@@ -111,6 +112,11 @@ function Documents() {
         onEdit={handleEdit}
         onCopy={handleCopy}
         onDelete={handleDelete}
+        onDownload={handleDownload}
+        ViewIconVisible={true}
+        EditIconVisible={true}
+        DownloadIconVisible={true}
+        DeleteIconVisible={true}
       />
       <ModalRemito
         open={open}

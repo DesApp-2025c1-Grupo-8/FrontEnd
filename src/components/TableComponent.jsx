@@ -14,8 +14,22 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
+import GetAppIcon from "@mui/icons-material/GetApp"; // Ícono de descarga
 
-function TableComponent({ columnas, filas, onView, onEdit, onCopy, onDelete }) {
+function TableComponent({
+  columnas,
+  filas,
+  onView,
+  onEdit,
+  onCopy,
+  onDelete,
+  onDownload, // opcional si luego querés manejar la descarga
+  ViewIconVisible,
+  EditIconVisible,
+  CopyIconVisible,
+  DeleteIconVisible,
+  DownloadIconVisible,
+}) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -74,34 +88,51 @@ function TableComponent({ columnas, filas, onView, onEdit, onCopy, onDelete }) {
                   <TableCell key={col.key}>
                     {col.key === "acciones" ? (
                       <div>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => onView && onView(fila)}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => onEdit && onEdit(fila)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => onCopy && onCopy(fila)}
-                        >
-                          <FileCopyIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => onDelete && onDelete(fila)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                        {ViewIconVisible && (
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => onView && onView(fila)}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                        {EditIconVisible && (
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => onEdit && onEdit(fila)}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                        {CopyIconVisible && (
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => onCopy && onCopy(fila)}
+                          >
+                            <FileCopyIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                        {DeleteIconVisible && (
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => onDelete && onDelete(fila)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                        {DownloadIconVisible && (
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => onDownload && onDownload(fila)}
+                          >
+                            <GetAppIcon fontSize="small" />
+                          </IconButton>
+                        )}
                       </div>
                     ) : (
                       fila[col.key]
@@ -122,7 +153,7 @@ function TableComponent({ columnas, filas, onView, onEdit, onCopy, onDelete }) {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 25, 50]}
-        labelRowsPerPage="Filas por página:"
+        labelRowsPerPage="Filas por página:"
       />
     </Paper>
   );
