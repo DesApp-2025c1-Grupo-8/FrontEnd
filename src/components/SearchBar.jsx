@@ -1,38 +1,32 @@
-import { Box, InputAdornment, TextField } from "@mui/material";
-
+import { TextField, InputAdornment } from "@mui/material";
 import React from "react";
-
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
-function SearchBar() {
+function SearchBar({ value, onChange, onKeyDown, placeholder }) {
   return (
-    <div>
-      <TextField
-        id="outlined-basic"
-        variant="outlined"
-        placeholder="Cliente"
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <ArrowDropDownIcon />
-              </InputAdornment>
-            ),
-          },
-        }}
-        sx={{
-          "& ::placeholder": {
-            borderBottom: "1px solid #4D4847",
-          },
-        }}
-      />
-    </div>
+    <TextField
+      id="outlined-basic"
+      variant="outlined"
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      onKeyDown={onKeyDown}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        },
+      }}
+      sx={{
+        "& ::placeholder": {
+          borderBottom: "1px solid #4D4847",
+        },
+      }}
+    />
   );
 }
 

@@ -1,91 +1,94 @@
-import {
-  Box,
-  Button,
-  InputAdornment,
-  TextField,
-  Typography,
-  InputBase,
-} from "@mui/material";
-
-import { styled } from "@mui/material/styles";
-
+import React, { useState, useMemo } from "react";
+import { Box, Button, Typography } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
-import React from "react";
-import { Search } from "@mui/icons-material";
+import { useSelector } from "react-redux";
+import { selectClientes } from "../redux/clientes/clientesSlice";
+
+import TableComponent from "../components/TableComponent";
 import SearchBar from "../components/SearchBar";
 
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  width: "100%",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    [theme.breakpoints.up("sm")]: {
-      width: "12ch",
-      "&:focus": {
-        width: "20ch",
-      },
-    },
-  },
-}));
-
 function Clients() {
+  const clientes = useSelector(selectClientes);
+
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleView = (row) => alert(`Ver cliente: ${row.id}`);
+  const handleEdit = (row) => alert(`Editar cliente: ${row.id}`);
+  const handleCopy = (row) => alert(`Copiar cliente: ${row.id}`);
+  const handleDelete = (row) => alert(`Eliminar cliente: ${row.id}`);
+
+  const columnas = clientes.length > 0 ? Object.keys(clientes[0]) : [];
+
+  // 🔍 Solo filtra cuando searchTerm cambia
+  const clientesFiltrados = useMemo(() => {
+    if (!searchTerm) return clientes;
+
+    const lowerSearch = searchTerm.toLowerCase();
+    return clientes.filter((cliente) =>
+      Object.values(cliente).some((valor) =>
+        String(valor).toLowerCase().includes(lowerSearch)
+      )
+    );
+  }, [clientes, searchTerm]);
+
+  const handleBuscarClick = () => {
+    setSearchTerm(searchInput.trim());
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      setSearchTerm(searchInput.trim());
+    }
+  };
+
+
   return (
-    <div>
-      <Box
+    <Box display="flex" flexDirection="column" gap={2} bgcolor="#F4FFF8">
+      <Typography
+        variant="h2"
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          backgroundColor: "#F4FFF8",
+          color: "black",
+          borderBottom: "3px solid #4D4847",
+          width: "fit-content",
         }}
-        gap={2}
       >
-        <Box>
-          <Typography
-            variant="h2"
-            sx={{
-              color: "black",
-              borderBottom: "3px solid #4D4847",
-              width: "fit-content",
-            }}
+        Gestión de Clientes
+      </Typography>
+
+      <Box display="flex" justifyContent="space-between">
+        <Box display="flex" gap={2}>
+          <SearchBar
+            placeholder="Buscar cliente"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <Button
+            variant="contained"
+            startIcon={<SearchIcon />}
+            onClick={handleBuscarClick}
           >
-            Gestión de Clientes
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Box
-            sx={{
-              display: "flex",
-            }}
-            gap={5}
-          >
-            <SearchBar />
-            <Button variant="contained" startIcon={<SearchIcon />}>
-              Buscar
-            </Button>
-          </Box>
-          <Button variant="contained" startIcon={<PersonAddIcon />}>
-            Nuevo Cliente
+            Buscar
           </Button>
         </Box>
-        <Box></Box>
+
+        <Button variant="contained" startIcon={<PersonAddIcon />}>
+          Nuevo Cliente
+        </Button>
       </Box>
-    </div>
+
+      <TableComponent
+        columnas={columnas}
+        filas={clientesFiltrados}
+        onView={handleView}
+        onEdit={handleEdit}
+        onCopy={handleCopy}
+        onDelete={handleDelete}
+      />
+    </Box>
   );
 }
 
