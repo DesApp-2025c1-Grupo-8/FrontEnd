@@ -54,15 +54,18 @@ function Reports() {
 
   return (
     <Box sx={{ p: { xs: 1, sm: 3 } }}>
-      <Box
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Typography
+        variant="h2"
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 2,
+          color: "black",
+          borderBottom: "3px solid #4D4847",
+          width: "fit-content",
         }}
       >
-        <Titulo>Reportes</Titulo>
+        Reportes
+      </Typography>
+
       </Box>
 
       <Box
