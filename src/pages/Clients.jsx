@@ -110,6 +110,9 @@ function Clients() {
         onEdit={handleEdit}
         onCopy={handleCopy}
         onDelete={handleDelete}
+        ViewIconVisible={true}
+        EditIconVisible={true}
+        DeleteIconVisible={true}
       />
       <ModalCliente
         open={open}
