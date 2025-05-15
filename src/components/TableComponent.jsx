@@ -54,7 +54,16 @@ function TableComponent({ columnas, filas, onView, onEdit, onCopy, onDelete }) {
           <TableHead>
             <TableRow>
               {columnasProcesadas.map((col) => (
-                <TableCell key={col.key}>{col.label}</TableCell>
+                <TableCell
+                  key={col.key}
+                  sx={{
+                    backgroundColor: "#8BAAAD",
+                    color: "black",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {col.label}
+                </TableCell>
               ))}
             </TableRow>
           </TableHead>
@@ -113,6 +122,7 @@ function TableComponent({ columnas, filas, onView, onEdit, onCopy, onDelete }) {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 25, 50]}
+        labelRowsPerPage="Filas por página:"
       />
     </Paper>
   );

@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   lista: [
     {
-      id: "0OA1D6",
+      IUC: "0OA1D6",
       razonSocial: "Metalúrgica del Oeste S.A.",
       CUIT: "20-12345678-9",
       direccion: "Av. Libertador 1234",
@@ -11,7 +11,7 @@ const initialState = {
       email: "uK2m0@example.com",
     },
     {
-      id: "0OA1D5",
+      IUC: "0OA1D5",
       razonSocial: "Distribuidora Norte S.A.",
       CUIT: "20-23456789-0",
       direccion: "Av. Libertador 2345",
@@ -19,7 +19,7 @@ const initialState = {
       email: "aGx0R@example.com",
     },
     {
-      id: "0OA1D4",
+      IUC: "0OA1D4",
       razonSocial: "Comercializadora Sur S.A.",
       CUIT: "20-34567890-1",
       direccion: "Av. Libertador 3456",
@@ -27,7 +27,7 @@ const initialState = {
       email: "fDm0U@example.com",
     },
     {
-      id: "0OA1D3",
+      IUC: "0OA1D3",
       razonSocial: "Industria Metalúrgica S.A.",
       CUIT: "20-45678901-2",
       direccion: "Av. Libertador 4567",
@@ -35,7 +35,7 @@ const initialState = {
       email: "8kVt5@example.com",
     },
     {
-      id: "0OA1D2",
+      IUC: "0OA1D2",
       razonSocial: "Comercializadora Central S.A.",
       CUIT: "20-56789012-3",
       direccion: "Av. Libertador 5678",
@@ -43,7 +43,7 @@ const initialState = {
       email: "7TQ0B@example.com",
     },
     {
-      id: "0OA1D1",
+      IUC: "0OA1D1",
       razonSocial: "Distribuidora del Sur S.A.",
       CUIT: "20-67890123-4",
       direccion: "Av. Libertador 6789",
