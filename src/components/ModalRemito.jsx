@@ -24,12 +24,11 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 const estadosRemito = [
   { value: 'retenido', label: 'Retenido' },
-  { value: 'autorizado', label: 'Autorizado' },
+  { value: 'pendiente', label: 'Pendiente' },
   { value: 'en_preparacion', label: 'En preparación' },
-  { value: 'en_carga', label: 'En carga' },
-  { value: 'en_camino', label: 'En camino' },
-  { value: 'no_entregado', label: 'No entregado' },
+  { value: 'en_transito', label: 'En tránsito' },
   { value: 'entregado', label: 'Entregado' },
+  { value: 'cancelado', label: 'Cancelado' },
 ];
 
 const categorias = [
