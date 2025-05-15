@@ -16,7 +16,16 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 function TablaReportes({ datos, onView, onEdit, onCopy, onDelete }) {
   return (
-    <TableContainer component={Paper} sx={{ mb: 2 }}>
+    <TableContainer 
+      component={Paper} 
+      sx={{ 
+        mb: 2,
+        background: '#f6fffa',
+        boxShadow: 'none',
+        borderRadius: 0,
+        border: 'none',
+      }}
+    >
       <Table>
         <TableHead>
           <TableRow
@@ -39,7 +48,14 @@ function TablaReportes({ datos, onView, onEdit, onCopy, onDelete }) {
         </TableHead>
         <TableBody>
           {datos.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow 
+              key={row.id}
+              sx={{
+                '&:hover': {
+                  backgroundColor: 'rgba(139, 170, 173, 0.1)',
+                },
+              }}
+            >
               <TableCell>{row.id}</TableCell>
               <TableCell>{row.tipo}</TableCell>
               <TableCell>{row.fecha}</TableCell>

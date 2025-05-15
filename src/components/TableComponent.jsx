@@ -9,6 +9,7 @@ import {
   Paper,
   IconButton,
   TablePagination,
+  Tooltip,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
@@ -62,7 +63,12 @@ function TableComponent({
   );
 
   return (
-    <Paper>
+    <Paper sx={{ 
+      background: '#f6fffa',
+      boxShadow: 'none',
+      borderRadius: 0,
+      border: 'none',
+    }}>
       <TableContainer>
         <Table>
           <TableHead>
@@ -71,9 +77,11 @@ function TableComponent({
                 <TableCell
                   key={col.key}
                   sx={{
-                    backgroundColor: "#8BAAAD",
-                    color: "black",
-                    fontWeight: "bold",
+                    backgroundColor: '#8BAAAD',
+                    color: '#222',
+                    fontWeight: 'bold',
+                    fontSize: '1rem',
+                    borderBottom: '2px solid #444',
                   }}
                 >
                   {col.label}
@@ -83,57 +91,74 @@ function TableComponent({
           </TableHead>
           <TableBody>
             {filasPaginadas.map((fila, index) => (
-              <TableRow key={index}>
+              <TableRow 
+                key={index}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'rgba(139, 170, 173, 0.1)',
+                  },
+                }}
+              >
                 {columnasProcesadas.map((col) => (
                   <TableCell key={col.key}>
                     {col.key === "acciones" ? (
-                      <div>
+                      <>
                         {ViewIconVisible && (
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => onView && onView(fila)}
-                          >
-                            <VisibilityIcon fontSize="small" />
-                          </IconButton>
+                          <Tooltip title="Ver">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => onView && onView(fila)}
+                            >
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                         )}
                         {EditIconVisible && (
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => onEdit && onEdit(fila)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
+                          <Tooltip title="Editar">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => onEdit && onEdit(fila)}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                         )}
                         {CopyIconVisible && (
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => onCopy && onCopy(fila)}
-                          >
-                            <FileCopyIcon fontSize="small" />
-                          </IconButton>
+                          <Tooltip title="Copiar">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => onCopy && onCopy(fila)}
+                            >
+                              <FileCopyIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                         )}
                         {DeleteIconVisible && (
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => onDelete && onDelete(fila)}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
+                          <Tooltip title="Eliminar">
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => onDelete && onDelete(fila)}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                         )}
                         {DownloadIconVisible && (
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => onDownload && onDownload(fila)}
-                          >
-                            <GetAppIcon fontSize="small" />
-                          </IconButton>
+                          <Tooltip title="Descargar">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => onDownload && onDownload(fila)}
+                            >
+                              <GetAppIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                         )}
-                      </div>
+                      </>
                     ) : (
                       fila[col.key]
                     )}
