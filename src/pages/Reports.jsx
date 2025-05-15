@@ -1,74 +1,56 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Typography,
-  Paper,
   Pagination,
   Select,
   MenuItem,
   FormControl,
-
 } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { useSelector } from 'react-redux';
 import { selectReportes } from '../redux/reportes/reportesSlice';
 
-import TablaReportes from '../components/TablaReportes';
+import TableComponent from '../components/TableComponent'; // Importar nuevo componente
 import ReporteDestacadoBox from '../components/ReporteDestacadoBox';
 import Titulo from '../components/Titulo';
 
 const reportesDestacados = [
   {
     titulo: 'Volumen total de mercadería por cliente/período',
-    icon: <DescriptionIcon fontSize="large" />, 
+    icon: <DescriptionIcon fontSize="large" />,
   },
   {
     titulo: 'Distribución geográfica de orígenes y destinos',
-    icon: <DescriptionIcon fontSize="large" />, 
+    icon: <DescriptionIcon fontSize="large" />,
   },
   {
     titulo: 'Análisis de valor declarado por tipo de mercadería',
-    icon: <DescriptionIcon fontSize="large" />, 
+    icon: <DescriptionIcon fontSize="large" />,
   },
 ];
 
 function Reports() {
-  const [cantidad, setCantidad] = useState(5);
-  const [pagina, setPagina] = useState(1);
-
-  // Obtener los reportes desde Redux
+  // Ya no necesitamos cantidad y pagina, porque TableComponent maneja su propia paginación
   const reportes = useSelector(selectReportes);
 
-  const handleChangeCantidad = (event) => {
-    setCantidad(event.target.value);
-    setPagina(1);
-  };
+  // Define columnas para TableComponent (usa las keys de tus objetos de reportes)
+  const columnas = [
+    { key: 'id', label: 'IDReporte' },
+    { key: 'tipo', label: 'Tipo de reporte' },
+    { key: 'fecha', label: 'Fecha' },
+    { key: 'parametros', label: 'Parámetros' },
+  ];
 
-  const handleChangePagina = (event, value) => {
-    setPagina(value);
-  };
-
-  // Funciones para acciones de la tabla
-  const handleView = (row) => {
-    alert(`Ver reporte: ${row.id}`);
-  };
-  const handleEdit = (row) => {
-    alert(`Editar reporte: ${row.id}`);
-  };
-  const handleCopy = (row) => {
-    alert(`Copiar reporte: ${row.id}`);
-  };
+  // Manejo de acciones
+  const handleView = (row) => alert(`Ver reporte: ${row.id}`);
+  const handleEdit = (row) => alert(`Editar reporte: ${row.id}`);
+  const handleCopy = (row) => alert(`Copiar reporte: ${row.id}`);
   const handleDelete = (row) => {
-    if(window.confirm(`¿Seguro que deseas eliminar el reporte ${row.id}?`)) {
+    if (window.confirm(`¿Seguro que deseas eliminar el reporte ${row.id}?`)) {
       alert(`Reporte eliminado: ${row.id}`);
     }
   };
-
-  // Paginación usando los datos de Redux
-  const inicio = (pagina - 1) * cantidad;
-  const fin = inicio + cantidad;
-  const datosPagina = reportes.slice(inicio, fin);
-  const totalPaginas = Math.ceil(reportes.length / cantidad);
 
   return (
     <Box sx={{ p: { xs: 1, sm: 3 } }}>
@@ -94,7 +76,7 @@ function Reports() {
           mb: 4,
           justifyContent: 'center',
           alignItems: 'center',
-          flexDirection: { xs: 'column', sm: 'row' }
+          flexDirection: { xs: 'column', sm: 'row' },
         }}
       >
         {reportesDestacados.map((reporte, idx) => (
@@ -102,33 +84,19 @@ function Reports() {
         ))}
       </Box>
 
-      <TablaReportes
-        datos={datosPagina}
+      <TableComponent
+        columnas={columnas}
+        filas={reportes}
         onView={handleView}
         onEdit={handleEdit}
         onCopy={handleCopy}
         onDelete={handleDelete}
+        ViewIconVisible={true}
+        EditIconVisible={true}
+        CopyIconVisible={true}
+        DeleteIconVisible={true}
+        DownloadIconVisible={false} // Si no usas descarga por ahora
       />
-
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-        <Typography variant="body2">Cantidad por página:</Typography>
-        <FormControl size="small" sx={{ minWidth: 60 }}>
-          <Select value={cantidad} onChange={handleChangeCantidad}>
-            {[5, 10, 50, 100].map((num) => (
-              <MenuItem key={num} value={num}>{num}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Pagination
-          count={totalPaginas}
-          page={pagina}
-          onChange={handleChangePagina}
-          color="primary"
-          shape="circular"
-          siblingCount={1}
-          boundaryCount={1}
-        />
-      </Box>
     </Box>
   );
 }
