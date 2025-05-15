@@ -1,114 +1,125 @@
-import React, { useState } from 'react';
-import ModalRemito from '../components/ModalRemito';
-import {
-  Box,
-  Button,
-  Container,
-  Stack,
-  useTheme,
-  useMediaQuery
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import React, { useState, useMemo } from "react";
 
-// Datos de ejemplo para un remito
-const remitoEjemplo = {
-  estado: 'en_preparacion',
-  fechaEmision: '2025-10-24',
-  destino: 'Sucursal BA-135',
-  razonSocial: 'Metalúrgica del Oeste S.A.',
-  cuit: '37-84658263-0',
-  tipoCliente: 'empresa privada',
-  peso: '59.910',
-  volumen: '7.65',
-  valor: '72300000',
-  categoria: 'metalurgica',
-  pallets: '0',
-  racks: '0',
-  bultos: '0',
-  tambores: '0',
-  bobinas: '0',
-  requiereRefrigeracion: true,
-  observaciones: 'Entregar en horario comercial. Manipular con cuidado.',
-  documentacion: '',
-};
+import { Box, Button, Typography } from "@mui/material";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import SearchIcon from "@mui/icons-material/Search";
 
-export default function Documents() {
-  const [open, setOpen] = useState(false);
-  const [modo, setModo] = useState('alta');
-  const [remito, setRemito] = useState(null);
+import { useSelector } from "react-redux";
+import { selectRemitos } from "../redux/remitos/remitosSlice";
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+import ModalRemito from "../components/ModalRemito";
+import TableComponent from "../components/TableComponent";
+import SearchBar from "../components/SearchBar";
 
-  const abrirAlta = () => {
-    setModo('alta');
+function Documents() {
+  const remitos = useSelector(selectRemitos);
+
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleCopy = (row) => alert(`Copiar remito: ${row.id}`);
+  const handleDelete = (row) => alert(`Eliminar remito: ${row.id}`);
+
+  const columnas = remitos.length > 0 ? Object.keys(remitos[0]) : [];
+
+  const remitosFiltrados = useMemo(() => {
+    if (!searchTerm) return remitos;
+
+    const lowerSearch = searchTerm.toLowerCase();
+    return remitos.filter((remitos) =>
+      Object.values(remitos).some((valor) =>
+        String(valor).toLowerCase().includes(lowerSearch)
+      )
+    );
+  }, [remitos, searchTerm]);
+
+  const handleBuscarClick = () => {
+    setSearchTerm(searchInput.trim());
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      setSearchTerm(searchInput.trim());
+    }
+  };
+
+  const [open, setOpen] = useState(false); // Controla si el modal está abierto
+  const [modo, setModo] = useState("alta"); // Modo del modal (alta, modificación, consulta)
+  const [remito, setRemito] = useState(null); // Datos del destino seleccionado
+
+  const handleAdd = () => {
+    setModo("alta");
     setRemito(null);
     setOpen(true);
   };
 
-  const abrirEdicion = () => {
-    setModo('modificacion');
-    setRemito(remitoEjemplo);
+  const handleEdit = (destinoEjemplo) => {
+    setModo("modificacion");
+    setRemito(destinoEjemplo);
     setOpen(true);
   };
 
-  const abrirConsulta = () => {
-    setModo('consulta');
-    setRemito(remitoEjemplo);
+  const handleView = (destinoEjemplo) => {
+    setModo("consulta");
+    setRemito(destinoEjemplo);
     setOpen(true);
   };
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 3 }}>
-        <Stack
-          direction={isMobile ? 'column' : 'row'}
-          spacing={2}
-          sx={{
-            justifyContent: { xs: 'stretch', sm: 'flex-start' },
-            width: '100%'
-          }}
-        >
+    <Box display="flex" flexDirection="column" gap={2} bgcolor="#F4FFF8">
+      <Typography
+        variant="h2"
+        sx={{
+          color: "black",
+          borderBottom: "3px solid #4D4847",
+          width: "fit-content",
+        }}
+      >
+        Gestión de Remitos
+      </Typography>
+
+      <Box display="flex" justifyContent="space-between">
+        <Box display="flex" gap={2}>
+          <SearchBar
+            placeholder="Buscar remito"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
           <Button
             variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={abrirAlta}
-            fullWidth={isMobile}
-            sx={{ textTransform: 'none' }}
+            startIcon={<SearchIcon />}
+            onClick={handleBuscarClick}
           >
-            Nuevo Remito
+            Buscar
           </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<EditIcon />}
-            onClick={abrirEdicion}
-            fullWidth={isMobile}
-            sx={{ textTransform: 'none' }}
-          >
-            Editar Remito
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<VisibilityIcon />}
-            onClick={abrirConsulta}
-            fullWidth={isMobile}
-            sx={{ textTransform: 'none' }}
-          >
-            Consultar Remito
-          </Button>
-        </Stack>
+        </Box>
+
+        <Button
+          variant="contained"
+          startIcon={<PersonAddIcon />}
+          onClick={handleAdd}
+        >
+          Nuevo Remito
+        </Button>
       </Box>
+
+      <TableComponent
+        columnas={columnas}
+        filas={remitosFiltrados}
+        onView={handleView}
+        onEdit={handleEdit}
+        onCopy={handleCopy}
+        onDelete={handleDelete}
+      />
       <ModalRemito
         open={open}
         onClose={() => setOpen(false)}
         modo={modo}
         remito={remito}
       />
-    </Container>
+    </Box>
   );
 }
+
+export default Documents;
