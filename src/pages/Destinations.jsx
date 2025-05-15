@@ -111,6 +111,10 @@ function Destinations() {
         onEdit={handleEdit}
         onCopy={handleCopy}
         onDelete={handleDelete}
+        ViewIconVisible={true}
+        EditIconVisible={true}
+        CopyIconVisible={true}
+        DeleteIconVisible={true}
       />
       <ModalDestino
         open={open}
