@@ -1,139 +1,131 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from "react";
 
-// Importación del componente ModalRemito
-import ModalRemito from '../components/ModalRemito';
+import { Box, Button, Typography } from "@mui/material";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import SearchIcon from "@mui/icons-material/Search";
 
-// Importaciones de componentes de Material-UI
-import { 
-  Box, 
-  Button, 
-  Container, 
-  Stack, 
-  useTheme, 
-  useMediaQuery 
-} from '@mui/material';
+import { useSelector } from "react-redux";
+import { selectRemitos } from "../redux/remitos/remitosSlice";
 
-// Importaciones de iconos de Material-UI
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import ModalRemito from "../components/ModalRemito";
+import TableComponent from "../components/TableComponent";
+import SearchBar from "../components/SearchBar";
 
-// Datos de ejemplo para un remito
-const remitoEjemplo = {
-  numeroRemito: '0001',
-  estado: 'autorizado',
-  fechaEmision: '2025-05-15',
-  destino: 'Destino Demo',
-  razonSocial: 'Empresa Demo',
-  cuit: '20-12345678-9',
-  tipoCliente: 'Empresa privada',
-  peso: '1000',
-  volumen: '10',
-  valor: '50000',
-  categoria: 'metalurgica',
-  pallets: '10',
-  racks: '5',
-  bultos: '20',
-  tambores: '2',
-  bobinas: '3',
-  requiereRefrigeracion: false,
-  observaciones: 'Sin observaciones',
-  archivo: null,
-  historial: [
-    { estado: 'Autorizado', fecha: '15/5/2025' }
-  ]
-};
+function Documents() {
+  const remitos = useSelector(selectRemitos);
 
-// Componente principal Documents
-export default function Documents() {
-  // Estados del componente
-  const [open, setOpen] = useState(false);
-  const [modo, setModo] = useState('alta');
-  const [remito, setRemito] = useState(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Hooks de Material-UI para responsive design
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const handleCopy = (row) => alert(`Copiar remito: ${row.id}`);
+  const handleDelete = (row) => alert(`Eliminar remito: ${row.id}`);
+  const handleDownload = (row) => alert(`Descargar remito: ${row.id}`);
 
-  // Función para abrir el modal en modo alta
-  const abrirAlta = () => {
-    setModo('alta');
+  const columnas = remitos.length > 0 ? Object.keys(remitos[0]) : [];
+
+  const remitosFiltrados = useMemo(() => {
+    if (!searchTerm) return remitos;
+
+    const lowerSearch = searchTerm.toLowerCase();
+    return remitos.filter((remitos) =>
+      Object.values(remitos).some((valor) =>
+        String(valor).toLowerCase().includes(lowerSearch)
+      )
+    );
+  }, [remitos, searchTerm]);
+
+  const handleBuscarClick = () => {
+    setSearchTerm(searchInput.trim());
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      setSearchTerm(searchInput.trim());
+    }
+  };
+
+  const [open, setOpen] = useState(false); // Controla si el modal está abierto
+  const [modo, setModo] = useState("alta"); // Modo del modal (alta, modificación, consulta)
+  const [remito, setRemito] = useState(null); // Datos del destino seleccionado
+
+  const handleAdd = () => {
+    setModo("alta");
     setRemito(null);
     setOpen(true);
   };
 
-  // Función para abrir el modal en modo edición
-  const abrirEdicion = () => {
-    setModo('modificacion');
-    setRemito(remitoEjemplo);
+  const handleEdit = (destinoEjemplo) => {
+    setModo("modificacion");
+    setRemito(destinoEjemplo);
     setOpen(true);
   };
 
-  // Función para abrir el modal en modo consulta
-  const abrirConsulta = () => {
-    setModo('consulta');
-    setRemito(remitoEjemplo);
+  const handleView = (destinoEjemplo) => {
+    setModo("consulta");
+    setRemito(destinoEjemplo);
     setOpen(true);
   };
 
-  // Renderizado del componente
   return (
-    <Container maxWidth="lg">
-      {/* Barra de botones */}
-      <Box sx={{ py: 3 }}>
-        <Stack 
-          direction={isMobile ? "column" : "row"}
-          spacing={2}
-          sx={{ 
-            justifyContent: { xs: 'stretch', sm: 'flex-start' },
-            width: '100%'
-          }}
-        >
-          {/* Botón Nuevo Remito */}
+    <Box display="flex" flexDirection="column" gap={2} bgcolor="#F4FFF8">
+      <Typography
+        variant="h2"
+        sx={{
+          color: "black",
+          borderBottom: "3px solid #4D4847",
+          width: "fit-content",
+        }}
+      >
+        Gestión de Remitos
+      </Typography>
+
+      <Box display="flex" justifyContent="space-between">
+        <Box display="flex" gap={2}>
+          <SearchBar
+            placeholder="Buscar remito"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
           <Button
             variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={abrirAlta}
-            fullWidth={isMobile}
-            sx={{ textTransform: 'none' }}
+            startIcon={<SearchIcon />}
+            onClick={handleBuscarClick}
           >
-            Nuevo Remito
+            Buscar
           </Button>
+        </Box>
 
-          {/* Botón Editar Remito */}
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<EditIcon />}
-            onClick={abrirEdicion}
-            fullWidth={isMobile}
-            sx={{ textTransform: 'none' }}
-          >
-            Editar Remito
-          </Button>
-
-          {/* Botón Consultar Remito */}
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<VisibilityIcon />}
-            onClick={abrirConsulta}
-            fullWidth={isMobile}
-            sx={{ textTransform: 'none' }}
-          >
-            Consultar Remito
-          </Button>
-        </Stack>
+        <Button
+          variant="contained"
+          startIcon={<PersonAddIcon />}
+          onClick={handleAdd}
+        >
+          Nuevo Remito
+        </Button>
       </Box>
 
-      {/* Modal de Remito */}
+      <TableComponent
+        columnas={columnas}
+        filas={remitosFiltrados}
+        onView={handleView}
+        onEdit={handleEdit}
+        onCopy={handleCopy}
+        onDelete={handleDelete}
+        onDownload={handleDownload}
+        ViewIconVisible={true}
+        EditIconVisible={true}
+        DownloadIconVisible={true}
+        DeleteIconVisible={true}
+      />
       <ModalRemito
         open={open}
         onClose={() => setOpen(false)}
         modo={modo}
         remito={remito}
       />
-    </Container>
+    </Box>
   );
 }
+
+export default Documents;
