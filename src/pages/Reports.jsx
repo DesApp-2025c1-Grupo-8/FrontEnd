@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -6,13 +6,16 @@ import {
   Select,
   MenuItem,
   FormControl,
+  Button,
 } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import { useSelector } from 'react-redux';
 import { selectReportes } from '../redux/reportes/reportesSlice';
 
 import TableComponent from '../components/TableComponent'; // Importar nuevo componente
 import ReporteDestacadoBox from '../components/ReporteDestacadoBox';
+import ModalReporte from "../components/ModalReporte";
 
 const reportesDestacados = [
   {
@@ -30,6 +33,12 @@ const reportesDestacados = [
 ];
 
 function Reports() {
+  const [open, setOpen] = useState(false);
+
+  const handleAdd = () => {
+    setOpen(true);
+  };
+
   // Ya no necesitamos cantidad y pagina, porque TableComponent maneja su propia paginación
   const reportes = useSelector(selectReportes);
 
@@ -52,8 +61,7 @@ function Reports() {
   };
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 3 } }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+    <Box display="flex" flexDirection="column" gap={2} bgcolor="#F4FFF8">
       <Typography
         variant="h2"
         sx={{
@@ -65,6 +73,20 @@ function Reports() {
         Reportes
       </Typography>
 
+      <Box display="flex" justifyContent="flex-end">
+        <Button
+          variant="contained"
+          startIcon={<AssessmentIcon />}
+          onClick={handleAdd}
+          sx={{
+            backgroundColor: '#8BAAAD',
+            '&:hover': {
+              backgroundColor: '#6B8A8D',
+            },
+          }}
+        >
+          Generar Nuevo Reporte
+        </Button>
       </Box>
 
       <Box
@@ -94,6 +116,11 @@ function Reports() {
         EditIconVisible={true}
         DeleteIconVisible={true}
         DownloadIconVisible={true} // Si no usas descarga por ahora
+      />
+
+      <ModalReporte
+        open={open}
+        onClose={() => setOpen(false)}
       />
     </Box>
   );
