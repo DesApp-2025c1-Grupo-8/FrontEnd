@@ -46,23 +46,6 @@ const categoriasMercaderia = [
   { value: 'bazar', label: 'Bazar' }
 ];
 
-// Tipos de cliente disponibles para los reportes
-const tiposCliente = [
-  { value: 'empresa_privada', label: 'Empresa Privada' },
-  { value: 'organismo_estatal', label: 'Organismo Estatal' },
-  { value: 'particular', label: 'Particular' }
-];
-
-// Estados posibles de un remito
-const estadosRemito = [
-  { value: 'retenido', label: 'Retenido' },
-  { value: 'pendiente', label: 'Pendiente' },
-  { value: 'en_preparacion', label: 'En Preparación' },
-  { value: 'en_transito', label: 'En Tránsito' },
-  { value: 'entregado', label: 'Entregado' },
-  { value: 'cancelado', label: 'Cancelado' }
-];
-
 /**
  * Componente ModalReporte
  * @param {boolean} open - Controla la visibilidad del modal
@@ -75,7 +58,6 @@ function ModalReporte({ open, onClose }) {
     tipoReporte: '',
     fechaInicio: '',
     fechaFin: '',
-    clientes: [],
     categoriasMercaderia: [],
     // Campos para distribución geográfica
     origen: {
@@ -90,15 +72,13 @@ function ModalReporte({ open, onClose }) {
       municipio: '',
       localidad: ''
     },
-    cliente: null,
-    tipoCliente: '',
-    estadoRemito: ''
+    cliente: null
   });
 
   // Estado para manejar errores de validación
   const [errores, setErrores] = useState({});
   const [mensajesError, setMensajesError] = useState({});
-  const [clientesDisponibles, setClientesDisponibles] = useState([]); // Se cargaría desde Redux
+  const [clientesDisponibles] = useState([]); // TODO: Implementar carga desde Redux
 
   // Resetear el formulario cuando se abre el modal
   useEffect(() => {
@@ -108,7 +88,6 @@ function ModalReporte({ open, onClose }) {
         tipoReporte: '',
         fechaInicio: '',
         fechaFin: '',
-        clientes: [],
         categoriasMercaderia: [],
         origen: {
           pais: '',
@@ -122,9 +101,7 @@ function ModalReporte({ open, onClose }) {
           municipio: '',
           localidad: ''
         },
-        cliente: null,
-        tipoCliente: '',
-        estadoRemito: ''
+        cliente: null
       });
       setErrores({});
     }
@@ -175,11 +152,6 @@ function ModalReporte({ open, onClose }) {
       mensajes.fechaFin = 'La fecha de fin es obligatoria';
     }
 
-    if (!form.estadoRemito) {
-      nuevosErrores.estadoRemito = true;
-      mensajes.estadoRemito = 'El estado del remito es obligatorio';
-    }
-
     // Validar campos según el tipo de reporte
     switch (form.tipoReporte) {
       case 'volumen_por_cliente':
@@ -187,17 +159,9 @@ function ModalReporte({ open, onClose }) {
           nuevosErrores.cliente = true;
           mensajes.cliente = 'El cliente es obligatorio';
         }
-        if (!form.tipoCliente) {
-          nuevosErrores.tipoCliente = true;
-          mensajes.tipoCliente = 'El tipo de cliente es obligatorio';
-        }
         if (!form.categoriasMercaderia || form.categoriasMercaderia.length === 0) {
           nuevosErrores.categoriasMercaderia = true;
           mensajes.categoriasMercaderia = 'Debe seleccionar al menos una categoría';
-        }
-        if (!form.peso) {
-          nuevosErrores.peso = true;
-          mensajes.peso = 'El peso es obligatorio';
         }
         if (!form.volumen) {
           nuevosErrores.volumen = true;
@@ -209,10 +173,6 @@ function ModalReporte({ open, onClose }) {
         if (!form.cliente) {
           nuevosErrores.cliente = true;
           mensajes.cliente = 'El cliente es obligatorio';
-        }
-        if (!form.tipoCliente) {
-          nuevosErrores.tipoCliente = true;
-          mensajes.tipoCliente = 'El tipo de cliente es obligatorio';
         }
         if (!form.origen.pais || !form.origen.provincia || !form.origen.municipio || !form.origen.localidad) {
           nuevosErrores.origen = true;
@@ -228,10 +188,6 @@ function ModalReporte({ open, onClose }) {
         if (!form.cliente) {
           nuevosErrores.cliente = true;
           mensajes.cliente = 'El cliente es obligatorio';
-        }
-        if (!form.tipoCliente) {
-          nuevosErrores.tipoCliente = true;
-          mensajes.tipoCliente = 'El tipo de cliente es obligatorio';
         }
         if (!form.categoriasMercaderia || form.categoriasMercaderia.length === 0) {
           nuevosErrores.categoriasMercaderia = true;
@@ -272,72 +228,78 @@ function ModalReporte({ open, onClose }) {
     }
   };
 
-  /**
-   * Renderiza los campos adicionales según el tipo de reporte seleccionado
-   * @returns {JSX.Element} - Campos específicos del tipo de reporte
-   */
+  // Componente para campos de fecha
+  const CamposFecha = () => (
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          label="Fecha Inicio"
+          name="fechaInicio"
+          type="date"
+          value={form.fechaInicio}
+          onChange={handleChange}
+          error={errores.fechaInicio}
+          helperText={errores.fechaInicio ? mensajesError.fechaInicio : ''}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          label="Fecha Fin"
+          name="fechaFin"
+          type="date"
+          value={form.fechaFin}
+          onChange={handleChange}
+          error={errores.fechaFin}
+          helperText={errores.fechaFin ? mensajesError.fechaFin : ''}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+      </Grid>
+    </Grid>
+  );
+
+  // Componente para información del cliente
+  const InformacionCliente = () => (
+    <Grid item xs={12} sx={{ mt: 2 }}>
+      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+        Información del Cliente
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Autocomplete
+            fullWidth
+            options={clientesDisponibles}
+            getOptionLabel={(option) => option.razonSocial}
+            value={form.cliente}
+            onChange={(_, newValue) => setForm(prev => ({ ...prev, cliente: newValue }))}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Cliente"
+                error={errores.cliente}
+                helperText={errores.cliente ? mensajesError.cliente : ''}
+                sx={{ minWidth: '300px' }}
+              />
+            )}
+          />
+        </Grid>
+      </Grid>
+    </Grid>
+  );
+
   const renderCamposAdicionales = () => {
     switch (form.tipoReporte) {
       case 'volumen_por_cliente':
         return (
           <>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Fecha Inicio"
-                  name="fechaInicio"
-                  type="date"
-                  value={form.fechaInicio}
-                  onChange={handleChange}
-                  error={errores.fechaInicio}
-                  helperText={errores.fechaInicio ? mensajesError.fechaInicio : ''}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Fecha Fin"
-                  name="fechaFin"
-                  type="date"
-                  value={form.fechaFin}
-                  onChange={handleChange}
-                  error={errores.fechaFin}
-                  helperText={errores.fechaFin ? mensajesError.fechaFin : ''}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth error={errores.estadoRemito} sx={{ minWidth: '300px' }}>
-                  <InputLabel>Estado de Remito</InputLabel>
-                  <Select
-                    name="estadoRemito"
-                    value={form.estadoRemito}
-                    onChange={handleChange}
-                    label="Estado de Remito"
-                  >
-                    {estadosRemito.map((estado) => (
-                      <MenuItem key={estado.value} value={estado.value}>
-                        {estado.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errores.estadoRemito && (
-                    <Typography color="error" variant="caption">
-                      {mensajesError.estadoRemito}
-                    </Typography>
-                  )}
-                </FormControl>
-              </Grid>
-            </Grid>
-
+            <CamposFecha />
             <Grid item xs={12} sx={{ mt: 2 }}>
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                 Información de Mercadería
@@ -365,20 +327,6 @@ function ModalReporte({ open, onClose }) {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="Peso (kg)"
-                    name="peso"
-                    type="number"
-                    value={form.peso || ''}
-                    onChange={handleChange}
-                    error={errores.peso}
-                    helperText={errores.peso ? mensajesError.peso : ''}
-                    sx={{ minWidth: '300px' }}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
                     label="Volumen (m³)"
                     name="volumen"
                     type="number"
@@ -391,89 +339,19 @@ function ModalReporte({ open, onClose }) {
                 </Grid>
               </Grid>
             </Grid>
-
-            <Grid item xs={12} sx={{ mt: 2 }}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                Información del Cliente
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Autocomplete
-                    fullWidth
-                    options={clientesDisponibles}
-                    getOptionLabel={(option) => option.razonSocial}
-                    value={form.cliente}
-                    onChange={(_, newValue) => setForm(prev => ({ ...prev, cliente: newValue }))}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Cliente"
-                        error={errores.cliente}
-                        helperText={errores.cliente ? mensajesError.cliente : ''}
-                        sx={{ minWidth: '300px' }}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControl fullWidth error={errores.tipoCliente} sx={{ minWidth: '300px' }}>
-                    <InputLabel>Tipo de Cliente</InputLabel>
-                    <Select
-                      name="tipoCliente"
-                      value={form.tipoCliente}
-                      onChange={handleChange}
-                      label="Tipo de Cliente"
-                    >
-                      {tiposCliente.map((tipo) => (
-                        <MenuItem key={tipo.value} value={tipo.value}>
-                          {tipo.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {errores.tipoCliente && (
-                      <Typography color="error" variant="caption">
-                        {mensajesError.tipoCliente}
-                      </Typography>
-                    )}
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </Grid>
+            <InformacionCliente />
           </>
         );
 
       case 'distribucion_geografica':
         return (
           <>
-            <Grid item xs={12}>
-              <FormControl fullWidth error={errores.estadoRemito} sx={{ minWidth: '300px' }}>
-                <InputLabel>Estado de Remito</InputLabel>
-                <Select
-                  name="estadoRemito"
-                  value={form.estadoRemito}
-                  onChange={handleChange}
-                  label="Estado de Remito"
-                >
-                  {estadosRemito.map((estado) => (
-                    <MenuItem key={estado.value} value={estado.value}>
-                      {estado.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errores.estadoRemito && (
-                  <Typography color="error" variant="caption">
-                    {mensajesError.estadoRemito}
-                  </Typography>
-                )}
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12}>
+            <Grid item xs={12} md={6}>
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                 Origen
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     label="País"
@@ -483,7 +361,7 @@ function ModalReporte({ open, onClose }) {
                     helperText={errores.origen ? mensajesError.origen : ''}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     label="Provincia"
@@ -492,7 +370,7 @@ function ModalReporte({ open, onClose }) {
                     error={errores.origen}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     label="Municipio"
@@ -501,7 +379,7 @@ function ModalReporte({ open, onClose }) {
                     error={errores.origen}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     label="Localidad"
@@ -557,117 +435,14 @@ function ModalReporte({ open, onClose }) {
                 </Grid>
               </Grid>
             </Grid>
-
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                Información del Cliente
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Autocomplete
-                    fullWidth
-                    options={clientesDisponibles}
-                    getOptionLabel={(option) => option.razonSocial}
-                    value={form.cliente}
-                    onChange={(_, newValue) => setForm(prev => ({ ...prev, cliente: newValue }))}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Cliente"
-                        error={errores.cliente}
-                        helperText={errores.cliente ? mensajesError.cliente : ''}
-                        sx={{ minWidth: '300px' }}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControl fullWidth error={errores.tipoCliente} sx={{ minWidth: '300px' }}>
-                    <InputLabel>Tipo de Cliente</InputLabel>
-                    <Select
-                      name="tipoCliente"
-                      value={form.tipoCliente}
-                      onChange={handleChange}
-                      label="Tipo de Cliente"
-                    >
-                      {tiposCliente.map((tipo) => (
-                        <MenuItem key={tipo.value} value={tipo.value}>
-                          {tipo.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {errores.tipoCliente && (
-                      <Typography color="error" variant="caption">
-                        {mensajesError.tipoCliente}
-                      </Typography>
-                    )}
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </Grid>
+            <InformacionCliente />
           </>
         );
 
       case 'valor_por_tipo':
         return (
           <>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Fecha Inicio"
-                  name="fechaInicio"
-                  type="date"
-                  value={form.fechaInicio}
-                  onChange={handleChange}
-                  error={errores.fechaInicio}
-                  helperText={errores.fechaInicio ? mensajesError.fechaInicio : ''}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Fecha Fin"
-                  name="fechaFin"
-                  type="date"
-                  value={form.fechaFin}
-                  onChange={handleChange}
-                  error={errores.fechaFin}
-                  helperText={errores.fechaFin ? mensajesError.fechaFin : ''}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth error={errores.estadoRemito} sx={{ minWidth: '300px' }}>
-                  <InputLabel>Estado de Remito</InputLabel>
-                  <Select
-                    name="estadoRemito"
-                    value={form.estadoRemito}
-                    onChange={handleChange}
-                    label="Estado de Remito"
-                  >
-                    {estadosRemito.map((estado) => (
-                      <MenuItem key={estado.value} value={estado.value}>
-                        {estado.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errores.estadoRemito && (
-                    <Typography color="error" variant="caption">
-                      {mensajesError.estadoRemito}
-                    </Typography>
-                  )}
-                </FormControl>
-              </Grid>
-            </Grid>
-
+            <CamposFecha />
             <Grid item xs={12} sx={{ mt: 2 }}>
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                 Información de Mercadería
@@ -727,54 +502,7 @@ function ModalReporte({ open, onClose }) {
                 </Grid>
               </Grid>
             </Grid>
-
-            <Grid item xs={12} sx={{ mt: 2 }}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                Información del Cliente
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Autocomplete
-                    fullWidth
-                    options={clientesDisponibles}
-                    getOptionLabel={(option) => option.razonSocial}
-                    value={form.cliente}
-                    onChange={(_, newValue) => setForm(prev => ({ ...prev, cliente: newValue }))}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Cliente"
-                        error={errores.cliente}
-                        helperText={errores.cliente ? mensajesError.cliente : ''}
-                        sx={{ minWidth: '300px' }}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControl fullWidth error={errores.tipoCliente} sx={{ minWidth: '300px' }}>
-                    <InputLabel>Tipo de Cliente</InputLabel>
-                    <Select
-                      name="tipoCliente"
-                      value={form.tipoCliente}
-                      onChange={handleChange}
-                      label="Tipo de Cliente"
-                    >
-                      {tiposCliente.map((tipo) => (
-                        <MenuItem key={tipo.value} value={tipo.value}>
-                          {tipo.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {errores.tipoCliente && (
-                      <Typography color="error" variant="caption">
-                        {mensajesError.tipoCliente}
-                      </Typography>
-                    )}
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </Grid>
+            <InformacionCliente />
           </>
         );
 
@@ -830,26 +558,26 @@ function ModalReporte({ open, onClose }) {
               </FormControl>
             </Grid>
 
-            {renderCamposAdicionales()}
-
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="flex-end" gap={2} mt={2}>
-                <Button
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                  onClick={handleGuardar}
-                  sx={{
-                    backgroundColor: '#8BAAAD',
-                    '&:hover': {
-                      backgroundColor: '#6B8A8D',
-                    },
-                  }}
-                >
-                  Generar Reporte
-                </Button>
-              </Box>
-            </Grid>
+            {form.tipoReporte && renderCamposAdicionales()}
           </Grid>
+
+          {form.tipoReporte && (
+            <Box display="flex" justifyContent="flex-start" mt={4}>
+              <Button
+                variant="contained"
+                startIcon={<SaveIcon />}
+                onClick={handleGuardar}
+                sx={{
+                  backgroundColor: '#8BAAAD',
+                  '&:hover': {
+                    backgroundColor: '#6B8A8D',
+                  },
+                }}
+              >
+                Generar Reporte
+              </Button>
+            </Box>
+          )}
         </DialogContent>
       </Box>
     </Dialog>
