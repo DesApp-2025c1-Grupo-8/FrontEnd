@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Box, Button, Typography, Container, Stack } from "@mui/material";
+import { Box, Button, Typography, Grid, Pagination } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
 
@@ -7,19 +7,19 @@ import { useSelector } from "react-redux";
 import { selectClientes } from "../redux/clientes/clientesSlice";
 
 import ModalCliente from "../components/ModalCliente";
-import TableComponent from "../components/TableComponent";
+import ClienteCard from "../components/ClienteCard";
 import SearchBar from "../components/SearchBar";
 
 function Clients() {
   const clientes = useSelector(selectClientes);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 5;
 
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleCopy = (row) => alert(`Copiar cliente: ${row.IUC}`);
-  const handleDelete = (row) => alert(`Eliminar cliente: ${row.IUC}`);
-
-  const columnas = clientes.length > 0 ? Object.keys(clientes[0]) : [];
+  const handleCopy = (cliente) => alert(`Copiar cliente: ${cliente.IUC}`);
+  const handleDelete = (cliente) => alert(`Eliminar cliente: ${cliente.IUC}`);
 
   const clientesFiltrados = useMemo(() => {
     if (!searchTerm) return clientes;
@@ -34,17 +34,19 @@ function Clients() {
 
   const handleBuscarClick = () => {
     setSearchTerm(searchInput.trim());
+    setPage(1); 
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       setSearchTerm(searchInput.trim());
+      setPage(1); 
     }
   };
 
-  const [open, setOpen] = useState(false); // Controla si el modal está abierto
-  const [modo, setModo] = useState("alta"); // Modo del modal (alta, modificación, consulta)
-  const [cliente, setCliente] = useState(null); // Datos del cliente seleccionado
+  const [open, setOpen] = useState(false);
+  const [modo, setModo] = useState("alta");
+  const [cliente, setCliente] = useState(null);
 
   const handleAdd = () => {
     setModo("alta");
@@ -64,8 +66,17 @@ function Clients() {
     setOpen(true);
   };
 
+  // Calcular paginación
+  const totalPages = Math.ceil(clientesFiltrados.length / itemsPerPage);
+  const startIndex = (page - 1) * itemsPerPage;
+  const clientesPaginados = clientesFiltrados.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
   return (
-    <Box display="flex" flexDirection="column" gap={2} bgcolor="#F4FFF8">
+    <Box display="flex" flexDirection="column" gap={3} bgcolor="#F4FFF8" p={3}>
       <Typography
         variant="h2"
         sx={{
@@ -77,7 +88,7 @@ function Clients() {
         Gestión de Clientes
       </Typography>
 
-      <Box display="flex" justifyContent="space-between">
+      <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box display="flex" gap={2}>
           <SearchBar
             placeholder="Buscar cliente"
@@ -103,17 +114,31 @@ function Clients() {
         </Button>
       </Box>
 
-      <TableComponent
-        columnas={columnas}
-        filas={clientesFiltrados}
-        onView={handleView}
-        onEdit={handleEdit}
-        onCopy={handleCopy}
-        onDelete={handleDelete}
-        ViewIconVisible={true}
-        EditIconVisible={true}
-        DeleteIconVisible={true}
-      />
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        {clientesPaginados.map((cliente) => (
+          <ClienteCard
+            key={cliente.IUC}
+            cliente={cliente}
+            onView={handleView}
+            onEdit={handleEdit}
+            onCopy={handleCopy}
+            onDelete={handleDelete}
+          />
+        ))}
+      </Box>
+
+      {totalPages > 1 && (
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handleChangePage}
+            color="primary"
+            size="large"
+          />
+        </Box>
+      )}
+
       <ModalCliente
         open={open}
         onClose={() => setOpen(false)}

@@ -4,7 +4,7 @@ const initialState = {
   lista: [
     {
       IUC: "0OA1D6",
-      razonSocial: "Metalúrgica del Oeste S.A.",
+      razonSocial: "Metalúrgica del Oeste S.A",
       "CUIT/RUT": "20-12345678-9",
       tipo: "Estatal",
       direccion: "Av. Libertador 1234",
