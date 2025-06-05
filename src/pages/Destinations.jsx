@@ -17,7 +17,31 @@ function Destinations() {
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleCopy = (row) => alert(`Copiar destino: ${row.id}`);
+  const handleCopy = (row) => {
+    const {
+      calle = "",
+      altura = "",
+      municipio = "",
+      localidad = "",
+      codigo_postal = "",
+      provincia = "",
+      pais = "",
+    } = row;
+
+    const direccionFormateada =
+      `${calle}, ${altura}, ${municipio}, ${localidad}, CP:${codigo_postal}, ${provincia}, ${pais}`.trim();
+
+    navigator.clipboard
+      .writeText(direccionFormateada)
+      .then(() => {
+        alert("Dirección copiada al portapapeles.");
+      })
+      .catch((err) => {
+        console.error("Error al copiar:", err);
+        alert("No se pudo copiar la dirección.");
+      });
+  };
+
   const handleDelete = (row) => alert(`Eliminar destino: ${row.id}`);
 
   const columnas = destinos.length > 0 ? Object.keys(destinos[0]) : [];

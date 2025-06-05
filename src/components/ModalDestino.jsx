@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -10,9 +10,13 @@ import {
   Box,
   Autocomplete,
   Button,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import SaveIcon from "@mui/icons-material/Save";
+  CircularProgress,
+} from "@mui/material"
+import CloseIcon from "@mui/icons-material/Close"
+import SaveIcon from "@mui/icons-material/Save"
+import LocationOnIcon from "@mui/icons-material/LocationOn"
+import { useDispatch, useSelector } from "react-redux"
+import { buscarDirecciones, limpiarSugerencias } from "../redux/direcciones/direccionesSlice"
 
 const camposIniciales = {
   nombre: "",
@@ -23,21 +27,25 @@ const camposIniciales = {
   codigo_postal: "",
   provincia: "",
   pais: "",
-};
+}
 
 const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
-  const [form, setForm] = useState(camposIniciales);
-  const [direccionInput, setDireccionInput] = useState("");
-  const [sugerencias, setSugerencias] = useState([]);
-  const [openAutocomplete, setOpenAutocomplete] = useState(false);
+  const dispatch = useDispatch()
+  const { sugerencias = [], estado = "idle" } = useSelector(
+    (state) => state.direcciones || { sugerencias: [], estado: "idle" },
+  )
+  const [form, setForm] = useState(camposIniciales)
+  const [direccionInput, setDireccionInput] = useState("")
+  const [openAutocomplete, setOpenAutocomplete] = useState(false)
+  const cargando = estado === "loading"
 
-  // Cuando cambia el destino o el modo, actualizar form
+  const esConsulta = modo === "consulta"
+
   useEffect(() => {
     if (modo === "alta" || !destino) {
-      setForm(camposIniciales);
-      setDireccionInput("");
+      setForm(camposIniciales)
+      setDireccionInput("")
     } else {
-      // Cargar los datos del destino seleccionado
       setForm({
         nombre: destino.nombre || "",
         calle: destino.calle || "",
@@ -47,65 +55,73 @@ const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
         codigo_postal: destino.codigo_postal || "",
         provincia: destino.provincia || "",
         pais: destino.pais || "",
-      });
-      // Si quieres, puedes inicializar direcciónInput con la calle + altura
-      setDireccionInput(
-        `${destino.calle || ""} ${destino.altura || ""}`.trim()
-      );
-    }
-  }, [modo, destino]);
-
-  const buscarDireccion = () => {
-    if (direccionInput.length < 3) {
-      setSugerencias([]);
-      setOpenAutocomplete(false);
-      return;
-    }
-
-    fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=ar&q=${encodeURIComponent(
-        direccionInput
-      )}`,
-      { headers: { "Accept-Language": "es" } }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setSugerencias(data);
-        setOpenAutocomplete(true);
       })
-      .catch(() => {});
-  };
+      setDireccionInput(`${destino.calle || ""} ${destino.altura || ""}`.trim())
+    }
+  }, [modo, destino])
+
+  // Limpiar sugerencias al cerrar el modal
+  useEffect(() => {
+    if (!open) {
+      dispatch(limpiarSugerencias())
+    }
+
+    // Cleanup al desmontar el componente
+    return () => {
+      dispatch(limpiarSugerencias())
+    }
+  }, [open, dispatch])
+
+  // Búsqueda automática con debounce
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (!esConsulta && direccionInput.length >= 3) {
+        dispatch(buscarDirecciones(direccionInput))
+        setOpenAutocomplete(true)
+      } else if (direccionInput.length < 3) {
+        dispatch(limpiarSugerencias())
+        setOpenAutocomplete(false)
+      }
+    }, 500) // espera 500ms después de escribir
+
+    return () => clearTimeout(handler)
+  }, [direccionInput, esConsulta, dispatch])
 
   const handleSeleccionDireccion = (option) => {
-    if (!option || !option.address) return;
-    const address = option.address;
+    if (!option) return
 
-    setForm((prev) => ({
-      ...prev,
-      calle: address.road || "",
-      altura: address.house_number || "",
-      municipio: address.state_district || address.village || "",
-      localidad: address.town || address.city || "",
-      codigo_postal: address.postcode || "",
-      provincia: address.state || "",
-      pais: address.country || "",
-    }));
+    // Verificar si option tiene la estructura esperada
+    if (option && option.address) {
+      const address = option.address
 
-    setDireccionInput(option.display_name);
-  };
+      setForm((prev) => ({
+        ...prev,
+        calle: address.road || address.street || "",
+        altura: address.house_number || "",
+        municipio: address.county || address.state_district || address.village || "",
+        localidad: address.city || address.town || address.village || "",
+        codigo_postal: address.postcode || "",
+        provincia: address.state || "",
+        pais: address.country || "",
+      }))
+
+      //setDireccionInput(option.display_name)
+    } else if (typeof option === "object") {
+      // Fallback para cuando la estructura no es la esperada
+      console.log("Estructura de dirección inesperada:", option)
+      setDireccionInput(option.display_name || "")
+    }
+  }
 
   const handleChangeCampo = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleGuardar = () => {
-    console.log("Destino guardado:", form);
-    // Aquí puedes agregar lógica para guardar o actualizar según modo
-    onClose();
-  };
-
-  const esConsulta = modo === "consulta";
+    console.log("Destino guardado:", form)
+    onClose()
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -119,20 +135,14 @@ const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
           }}
         >
           <Typography variant="h5" fontWeight="bold">
-            {modo === "alta"
-              ? "Nuevo Destino"
-              : modo === "modificacion"
-              ? "Editar Destino"
-              : "Detalle del Destino"}
+            {modo === "alta" ? "Nuevo Destino" : modo === "modificacion" ? "Editar Destino" : "Detalle del Destino"}
           </Typography>
           <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <Box
-            sx={{ border: "1px solid #b2ebf2", borderRadius: 2, p: 2, mt: 2 }}
-          >
+          <Box sx={{ border: "1px solid #b2ebf2", borderRadius: 2, p: 2, mt: 2 }}>
             <Typography
               variant="subtitle1"
               sx={{
@@ -145,7 +155,6 @@ const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
               Información del destino
             </Typography>
             <Grid container spacing={2}>
-              {/* Fila 1: nombre */}
               <Grid item xs={12}>
                 <TextField
                   label="Nombre del destino"
@@ -158,46 +167,60 @@ const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
                 />
               </Grid>
 
-              {/* Fila 2: dirección autocomplete */}
-              <Grid item xs={12} sx={{ width: "100%" }}>
+              {!esConsulta && (<Grid item xs={12} sx={{ width: "100%" }}>
                 <Autocomplete
                   freeSolo
-                  options={sugerencias}
-                  getOptionLabel={(option) =>
-                    typeof option === "string" ? option : option.display_name
-                  }
+                  options={sugerencias || []}
+                  getOptionLabel={(option) => (typeof option === "string" ? option : option.display_name || "")}
                   inputValue={direccionInput}
-                  onInputChange={(e, newInputValue) =>
-                    !esConsulta && setDireccionInput(newInputValue)
-                  }
-                  onChange={(e, newValue) =>
-                    !esConsulta && handleSeleccionDireccion(newValue)
-                  }
-                  open={openAutocomplete}
+                  onInputChange={(e, newInputValue) => !esConsulta && setDireccionInput(newInputValue)}
+                  onChange={(e, newValue) => !esConsulta && handleSeleccionDireccion(newValue)}
+                  open={openAutocomplete && sugerencias && sugerencias.length > 0}
                   onOpen={() => {
-                    if (sugerencias.length > 0) {
-                      setOpenAutocomplete(true);
+                    if (sugerencias && sugerencias.length > 0) {
+                      setOpenAutocomplete(true)
                     }
                   }}
                   onClose={() => setOpenAutocomplete(false)}
+                  loading={cargando}
+                  renderOption={(props, option) => (
+                    <li {...props}>
+                      <Grid container alignItems="center">
+                        <Grid item>
+                          <LocationOnIcon sx={{ color: "text.secondary", mr: 1 }} />
+                        </Grid>
+                        <Grid item xs>
+                          <Typography variant="body2" color="text.primary">
+                            {option.display_name}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </li>
+                  )}
                   renderInput={(params) => (
                     <TextField
                       {...params}
                       label="Buscador de dirección"
                       size="small"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          if (!esConsulta) buscarDireccion();
-                        }
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {cargando ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
                       }}
-                      disabled={esConsulta}
+                      helperText={
+                        direccionInput.length > 0 && direccionInput.length < 3
+                          ? "Ingresa al menos 3 caracteres para buscar"
+                          : ""
+                      }
                     />
                   )}
                 />
-              </Grid>
+              </Grid>)}
 
-              {/* Fila 3: altura, municipio, localidad */}
               <Grid item xs={12} sm={4}>
                 <TextField
                   label="Calle"
@@ -242,8 +265,6 @@ const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
                   disabled={esConsulta}
                 />
               </Grid>
-
-              {/* Fila 4: código postal, provincia, país */}
               <Grid item xs={12} sm={4}>
                 <TextField
                   label="Código Postal"
@@ -279,15 +300,9 @@ const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
               </Grid>
             </Grid>
 
-            {/* Botón guardar (oculto si es modo consulta) */}
             {!esConsulta && (
               <Box mt={3} display="flex" justifyContent="flex-end">
-                <Button
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                  onClick={handleGuardar}
-                  color="primary"
-                >
+                <Button variant="contained" startIcon={<SaveIcon />} onClick={handleGuardar} color="primary">
                   Guardar
                 </Button>
               </Box>
@@ -296,7 +311,7 @@ const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
         </DialogContent>
       </Box>
     </Dialog>
-  );
-};
+  )
+}
 
-export default ModalDestino;
+export default ModalDestino
