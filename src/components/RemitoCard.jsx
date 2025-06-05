@@ -68,11 +68,11 @@ function RemitoCard({ remito, onView, onEdit, onCopy, onDelete, onDownload }) {
 
   const getTipoClienteColor = (tipo) => {
     switch (tipo.toLowerCase()) {
-      case "empresa privada":
+      case "Privado":
         return "#1976d2";
-      case "organismo estatal":
+      case "Estatal":
         return "#388e3c";
-      case "particular":
+      case "Particular":
         return "#f57c00";
       default:
         return "#757575";
@@ -140,8 +140,9 @@ function RemitoCard({ remito, onView, onEdit, onCopy, onDelete, onDownload }) {
                     mb: 0.3,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
-                    whiteSpace: "nowrap"
+                    whiteSpace: "nowrap",
                   }}
+                  color="primary"
                 >
                   {remito.razonSocial}
                 </Typography>

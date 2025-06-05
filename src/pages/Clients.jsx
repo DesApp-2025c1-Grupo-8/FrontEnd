@@ -88,8 +88,8 @@ function Clients() {
         Gestión de Clientes
       </Typography>
 
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Box display="flex" gap={2}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{flexDirection: { xs: 'column', sm: 'row' }, gap:{ xs: 2, sm: 0 }}}>
+        <Box display="flex" gap={2} sx={{flexDirection: { xs: 'column', sm: 'row' }}}>
           <SearchBar
             placeholder="Buscar cliente"
             value={searchInput}

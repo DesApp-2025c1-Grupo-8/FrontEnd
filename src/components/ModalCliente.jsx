@@ -171,7 +171,7 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
 
   // Maneja la eliminación del cliente
   const handleEliminar = () => {
-    // Solo visual
+    // Solo visual de momento
   };
 
   // Determina si los campos son editables según el modo
@@ -259,7 +259,7 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
                 </Box>
               </Grid>
               {/* Campo Tipo de Cliente (selector) */}
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6} sx={{width: '50%'}}>
                 <Box display="flex" alignItems="center">
                   <TextField
                     select
