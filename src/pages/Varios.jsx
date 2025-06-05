@@ -47,15 +47,19 @@ function Varios() {
   };
 
   // Calcular paginación para Estados
-  const totalPagesEstados = Math.ceil(estadosFiltrados.length / itemsPerPageEstados);
+  const totalPagesEstados = Math.ceil(
+    estadosFiltrados.length / itemsPerPageEstados
+  );
   const startIndexEstados = (pageEstados - 1) * itemsPerPageEstados;
-  const estadosPaginados = estadosFiltrados.slice(startIndexEstados, startIndexEstados + itemsPerPageEstados);
+  const estadosPaginados = estadosFiltrados.slice(
+    startIndexEstados,
+    startIndexEstados + itemsPerPageEstados
+  );
 
   const handleChangePageEstados = (event, newPage) => {
     setPageEstados(newPage);
   };
 
-  const handleCopy = (row) => alert(`Copiar estado: ${row.IUC}`);
   const handleDelete = (row) => alert(`Eliminar estado: ${row.IUC}`);
 
   // Modal Estados
@@ -111,9 +115,14 @@ function Varios() {
   };
 
   // Calcular paginación para Categorías
-  const totalPagesCategorias = Math.ceil(categoriasFiltradas.length / itemsPerPageCategorias);
+  const totalPagesCategorias = Math.ceil(
+    categoriasFiltradas.length / itemsPerPageCategorias
+  );
   const startIndexCategorias = (pageCategorias - 1) * itemsPerPageCategorias;
-  const categoriasPaginadas = categoriasFiltradas.slice(startIndexCategorias, startIndexCategorias + itemsPerPageCategorias);
+  const categoriasPaginadas = categoriasFiltradas.slice(
+    startIndexCategorias,
+    startIndexCategorias + itemsPerPageCategorias
+  );
 
   const handleChangePageCategorias = (event, newPage) => {
     setPageCategorias(newPage);
@@ -146,7 +155,6 @@ function Varios() {
 
   return (
     <Box display="flex" flexDirection="column" gap={4} bgcolor="#F4FFF8" p={2}>
-      
       <Box display="flex" flexDirection="column" gap={2}>
         <Typography
           variant="h2"
@@ -159,8 +167,19 @@ function Varios() {
           Gestión de Estados
         </Typography>
 
-        <Box display="flex" justifyContent="space-between">
-          <Box display="flex" gap={2}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          sx={{
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 2 },
+          }}
+        >
+          <Box
+            display="flex"
+            gap={2}
+            sx={{ flexDirection: { xs: "column", sm: "row" } }}
+          >
             <SearchBar
               placeholder="Buscar estado"
               value={searchInputEstados}
@@ -192,7 +211,6 @@ function Varios() {
               estado={estado}
               onView={handleView}
               onEdit={handleEdit}
-              onCopy={handleCopy}
               onDelete={handleDelete}
             />
           ))}
@@ -218,7 +236,6 @@ function Varios() {
         />
       </Box>
 
-      
       <Box display="flex" flexDirection="column" gap={2}>
         <Typography
           variant="h2"
@@ -231,8 +248,19 @@ function Varios() {
           Gestión de Categorías
         </Typography>
 
-        <Box display="flex" justifyContent="space-between">
-          <Box display="flex" gap={2}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          sx={{
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 2 },
+          }}
+        >
+          <Box
+            display="flex"
+            gap={2}
+            sx={{ flexDirection: { xs: "column", sm: "row" } }}
+          >
             <SearchBar
               placeholder="Buscar categoría"
               value={searchInputCategorias}

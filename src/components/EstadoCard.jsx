@@ -15,7 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import InfoIcon from "@mui/icons-material/Info";
 import CircleIcon from "@mui/icons-material/Circle";
 
-function EstadoCard({ estado, onView, onEdit, onCopy, onDelete }) {
+function EstadoCard({ estado, onView, onEdit, onDelete }) {
   const getEstadoColor = (nombreEstado) => {
     switch (nombreEstado.toLowerCase()) {
       case "pendiente":
@@ -37,7 +37,6 @@ function EstadoCard({ estado, onView, onEdit, onCopy, onDelete }) {
     <Card
       sx={{
         width: "100%",
-        minWidth: "520px", // Límite mínimo de ancho
         backgroundColor: "#f6fffa",
         "&:hover": {
           backgroundColor: "rgba(139, 170, 173, 0.15)",
@@ -81,9 +80,10 @@ function EstadoCard({ estado, onView, onEdit, onCopy, onDelete }) {
                 justifyContent: "center",
                 width: 70,
                 height: 70,
-                backgroundColor: "rgba(156, 39, 176, 0.1)",
+                backgroundColor: "#f6fffa",
                 borderRadius: 2,
-                border: "2px solid #9c27b0",
+                border: "2px solid",
+                borderColor: getEstadoColor(estado.nombre),
               }}
             >
               <CircleIcon sx={{ color: getEstadoColor(estado.nombre), fontSize: "1.8rem", mb: 0.3 }} />
@@ -164,20 +164,6 @@ function EstadoCard({ estado, onView, onEdit, onCopy, onDelete }) {
                 }}
               >
                 <EditIcon sx={{ fontSize: "0.9rem" }} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Copiar">
-              <IconButton 
-                size="small" 
-                onClick={() => onCopy && onCopy(estado)}
-                sx={{ 
-                  backgroundColor: "#fff3e0",
-                  "&:hover": { backgroundColor: "#ffe0b2" },
-                  width: 32,
-                  height: 32,
-                }}
-              >
-                <FileCopyIcon sx={{ fontSize: "0.9rem" }} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Eliminar">
