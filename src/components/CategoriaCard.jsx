@@ -19,7 +19,6 @@ function CategoriaCard({ categoria, onView, onEdit, onDelete }) {
     <Card
       sx={{
         width: "100%",
-        minWidth: "520px", // Límite mínimo de ancho
         backgroundColor: "#f6fffa",
         "&:hover": {
           backgroundColor: "rgba(139, 170, 173, 0.15)",
@@ -64,7 +63,7 @@ function CategoriaCard({ categoria, onView, onEdit, onDelete }) {
                 justifyContent: "center",
                 width: 70,
                 height: 70,
-                backgroundColor: "rgba(76, 175, 80, 0.1)",
+                backgroundColor: "#f6fffa",
                 borderRadius: 2,
                 border: "2px solid #4caf50",
               }}
