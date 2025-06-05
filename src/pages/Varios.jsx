@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, Pagination } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
 
@@ -9,14 +9,17 @@ import { selectCategorias } from "../redux/categorias/categoriasSlice";
 
 import ModalEstadosRemito from "../components/ModalEstadosRemito";
 import ModalCategoria from "../components/ModalCategoria";
-import TableComponent from "../components/TableComponent";
+import EstadoCard from "../components/EstadoCard";
+import CategoriaCard from "../components/CategoriaCard";
 import SearchBar from "../components/SearchBar";
 
 function Varios() {
   const estados = useSelector(selectEstadosRemito);
   const categorias = useSelector(selectCategorias);
 
-  // Estados búsqueda
+  // Estados - paginación y búsqueda
+  const [pageEstados, setPageEstados] = useState(1);
+  const itemsPerPageEstados = 3;
   const [searchInputEstados, setSearchInputEstados] = useState("");
   const [searchTermEstados, setSearchTermEstados] = useState("");
 
@@ -33,17 +36,30 @@ function Varios() {
 
   const handleBuscarEstados = () => {
     setSearchTermEstados(searchInputEstados.trim());
+    setPageEstados(1); // Resetear página al buscar
   };
 
   const handleKeyDownEstados = (e) => {
     if (e.key === "Enter") {
       setSearchTermEstados(searchInputEstados.trim());
+      setPageEstados(1); // Resetear página al buscar
     }
   };
 
-  const columnas = estados.length > 0 ? Object.keys(estados[0]) : [];
+  // Calcular paginación para Estados
+  const totalPagesEstados = Math.ceil(
+    estadosFiltrados.length / itemsPerPageEstados
+  );
+  const startIndexEstados = (pageEstados - 1) * itemsPerPageEstados;
+  const estadosPaginados = estadosFiltrados.slice(
+    startIndexEstados,
+    startIndexEstados + itemsPerPageEstados
+  );
 
-  const handleCopy = (row) => alert(`Copiar estado: ${row.IUC}`);
+  const handleChangePageEstados = (event, newPage) => {
+    setPageEstados(newPage);
+  };
+
   const handleDelete = (row) => alert(`Eliminar estado: ${row.IUC}`);
 
   // Modal Estados
@@ -69,7 +85,9 @@ function Varios() {
     setOpen(true);
   };
 
-  // Categorías búsqueda
+  // Categorías - paginación y búsqueda
+  const [pageCategorias, setPageCategorias] = useState(1);
+  const itemsPerPageCategorias = 3;
   const [searchInputCategorias, setSearchInputCategorias] = useState("");
   const [searchTermCategorias, setSearchTermCategorias] = useState("");
 
@@ -86,17 +104,31 @@ function Varios() {
 
   const handleBuscarCategorias = () => {
     setSearchTermCategorias(searchInputCategorias.trim());
+    setPageCategorias(1); // Resetear página al buscar
   };
 
   const handleKeyDownCategorias = (e) => {
     if (e.key === "Enter") {
       setSearchTermCategorias(searchInputCategorias.trim());
+      setPageCategorias(1); // Resetear página al buscar
     }
   };
 
-  const handleDeleteCat = (row) => alert(`Eliminar categoria: ${row.id}`);
+  // Calcular paginación para Categorías
+  const totalPagesCategorias = Math.ceil(
+    categoriasFiltradas.length / itemsPerPageCategorias
+  );
+  const startIndexCategorias = (pageCategorias - 1) * itemsPerPageCategorias;
+  const categoriasPaginadas = categoriasFiltradas.slice(
+    startIndexCategorias,
+    startIndexCategorias + itemsPerPageCategorias
+  );
 
-  const columnasCat = categorias.length > 0 ? Object.keys(categorias[0]) : [];
+  const handleChangePageCategorias = (event, newPage) => {
+    setPageCategorias(newPage);
+  };
+
+  const handleDeleteCat = (row) => alert(`Eliminar categoria: ${row.id}`);
 
   // Modal Categoría
   const [openCat, setOpenCat] = useState(false);
@@ -123,7 +155,6 @@ function Varios() {
 
   return (
     <Box display="flex" flexDirection="column" gap={4} bgcolor="#F4FFF8" p={2}>
-      {/* Gestión de Estados */}
       <Box display="flex" flexDirection="column" gap={2}>
         <Typography
           variant="h2"
@@ -136,8 +167,19 @@ function Varios() {
           Gestión de Estados
         </Typography>
 
-        <Box display="flex" justifyContent="space-between">
-          <Box display="flex" gap={2}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          sx={{
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 2 },
+          }}
+        >
+          <Box
+            display="flex"
+            gap={2}
+            sx={{ flexDirection: { xs: "column", sm: "row" } }}
+          >
             <SearchBar
               placeholder="Buscar estado"
               value={searchInputEstados}
@@ -162,16 +204,29 @@ function Varios() {
           </Button>
         </Box>
 
-        <TableComponent
-          columnas={columnas}
-          filas={estadosFiltrados}
-          onView={handleView}
-          onEdit={handleEdit}
-          onCopy={handleCopy}
-          onDelete={handleDelete}
-          EditIconVisible={true}
-          DeleteIconVisible={true}
-        />
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {estadosPaginados.map((estado) => (
+            <EstadoCard
+              key={estado.id}
+              estado={estado}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </Box>
+
+        {totalPagesEstados > 1 && (
+          <Box display="flex" justifyContent="center" mt={2}>
+            <Pagination
+              count={totalPagesEstados}
+              page={pageEstados}
+              onChange={handleChangePageEstados}
+              color="primary"
+              size="medium"
+            />
+          </Box>
+        )}
 
         <ModalEstadosRemito
           open={open}
@@ -181,7 +236,6 @@ function Varios() {
         />
       </Box>
 
-      {/* Gestión de Categorías */}
       <Box display="flex" flexDirection="column" gap={2}>
         <Typography
           variant="h2"
@@ -194,8 +248,19 @@ function Varios() {
           Gestión de Categorías
         </Typography>
 
-        <Box display="flex" justifyContent="space-between">
-          <Box display="flex" gap={2}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          sx={{
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 2 },
+          }}
+        >
+          <Box
+            display="flex"
+            gap={2}
+            sx={{ flexDirection: { xs: "column", sm: "row" } }}
+          >
             <SearchBar
               placeholder="Buscar categoría"
               value={searchInputCategorias}
@@ -220,15 +285,29 @@ function Varios() {
           </Button>
         </Box>
 
-        <TableComponent
-          columnas={columnasCat}
-          filas={categoriasFiltradas}
-          onView={handleViewCat}
-          onEdit={handleEditCat}
-          onDelete={handleDeleteCat}
-          EditIconVisible={true}
-          DeleteIconVisible={true}
-        />
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {categoriasPaginadas.map((categoria) => (
+            <CategoriaCard
+              key={categoria.id}
+              categoria={categoria}
+              onView={handleViewCat}
+              onEdit={handleEditCat}
+              onDelete={handleDeleteCat}
+            />
+          ))}
+        </Box>
+
+        {totalPagesCategorias > 1 && (
+          <Box display="flex" justifyContent="center" mt={2}>
+            <Pagination
+              count={totalPagesCategorias}
+              page={pageCategorias}
+              onChange={handleChangePageCategorias}
+              color="primary"
+              size="medium"
+            />
+          </Box>
+        )}
 
         <ModalCategoria
           open={openCat}

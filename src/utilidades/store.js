@@ -6,6 +6,7 @@ import mercaderiaReducer from '../redux/mercaderia/mercaderiaSlice';
 import reportesReducer from '../redux/reportes/reportesSlice';
 import categoriasReducer from '../redux/categorias/categoriasSlice';
 import estadosRemitoReducer from '../redux/estadosRemito/estadosRemitoSlice';
+import direccionesReducer from '../redux/direcciones/direccionesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     reportes: reportesReducer,
     categorias: categoriasReducer,
     estadosRemito: estadosRemitoReducer,
+    direcciones: direccionesReducer
   },
 });
 
