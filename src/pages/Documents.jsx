@@ -133,6 +133,7 @@ function Documents() {
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {remitosPaginados.map((remito) => (
           <RemitoCard
+            key={remito.numeroRemito}
             remito={remito}
             onView={handleView}
             onEdit={handleEdit}
