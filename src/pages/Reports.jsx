@@ -121,12 +121,7 @@ function Reports() {
             variant="contained"
             startIcon={<AssessmentIcon />}
             onClick={handleAdd}
-            sx={{
-              backgroundColor: "#8BAAAD",
-              "&:hover": {
-                backgroundColor: "#6B8A8D",
-              },
-            }}
+            color="primary"
           >
             Generar Nuevo Reporte
           </Button>
