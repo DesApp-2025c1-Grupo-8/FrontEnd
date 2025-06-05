@@ -19,8 +19,32 @@ function Destinations() {
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleCopy = (destino) => alert(`Copiar destino: ${destino.id}`);
-  const handleDelete = (destino) => alert(`Eliminar destino: ${destino.id}`);
+  const handleCopy = (row) => {
+    const {
+      calle = "",
+      altura = "",
+      municipio = "",
+      localidad = "",
+      codigo_postal = "",
+      provincia = "",
+      pais = "",
+    } = row;
+
+    const direccionFormateada =
+      `${calle}, ${altura}, ${municipio}, ${localidad}, CP:${codigo_postal}, ${provincia}, ${pais}`.trim();
+
+    navigator.clipboard
+      .writeText(direccionFormateada)
+      .then(() => {
+        alert("Dirección copiada al portapapeles.");
+      })
+      .catch((err) => {
+        console.error("Error al copiar:", err);
+        alert("No se pudo copiar la dirección.");
+      });
+  };
+
+  const handleDelete = (row) => alert(`Eliminar destino: ${row.id}`);
 
   const destinosFiltrados = useMemo(() => {
     if (!searchTerm) return destinos;
