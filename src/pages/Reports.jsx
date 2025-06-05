@@ -1,20 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Typography,
-  Pagination,
   Button,
+  Pagination,
 } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import { useSelector } from 'react-redux';
 import { selectReportes } from '../redux/reportes/reportesSlice';
-
-import ReporteCard from '../components/ReporteCard';
 import ReporteDestacadoBox from '../components/ReporteDestacadoBox';
+import ModalReporte from "../components/ModalReporte";
 import SearchBar from '../components/SearchBar';
+import TableComponent from '../components/TableComponent';
 
+// Lista de reportes destacados que se muestran en la parte superior
 const reportesDestacados = [
   {
     titulo: 'Volumen total de mercadería por cliente/período',
@@ -30,63 +30,25 @@ const reportesDestacados = [
   },
 ];
 
+/**
+ * Componente principal de la página de Reportes
+ * @returns {JSX.Element} - Página completa de reportes
+ */
 function Reports() {
+    // Ya no necesitamos cantidad y pagina, porque TableComponent maneja su propia paginación
   const reportes = useSelector(selectReportes);
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 5;
 
-  const [searchInput, setSearchInput] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const reportesFiltrados = useMemo(() => {
-    if (!searchTerm) return reportes;
-
-    const lowerSearch = searchTerm.toLowerCase();
-    return reportes.filter((reporte) =>
-      Object.values(reporte).some((valor) =>
-        String(valor).toLowerCase().includes(lowerSearch)
-      )
-    );
-  }, [reportes, searchTerm]);
-
-  const handleBuscarClick = () => {
-    setSearchTerm(searchInput.trim());
-    setPage(1); 
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      setSearchTerm(searchInput.trim());
-      setPage(1); 
-    }
-  };
-
-  // Manejo de acciones
-  const handleView = (reporte) => alert(`Ver reporte: ${reporte.id}`);
-  const handleEdit = (reporte) => alert(`Editar reporte: ${reporte.id}`);
-  const handleCopy = (reporte) => alert(`Copiar reporte: ${reporte.id}`);
-  const handleDownload = (reporte) => alert(`Descargar reporte: ${reporte.id}`);
-  const handleDelete = (reporte) => {
-    if (window.confirm(`¿Seguro que deseas eliminar el reporte ${reporte.id}?`)) {
-      alert(`Reporte eliminado: ${reporte.id}`);
-    }
-  };
-
-  const handleAdd = () => {
-    alert("Crear nuevo reporte");
-  };
-
-  // Calcular paginación
-  const totalPages = Math.ceil(reportesFiltrados.length / itemsPerPage);
-  const startIndex = (page - 1) * itemsPerPage;
-  const reportesPaginados = reportesFiltrados.slice(startIndex, startIndex + itemsPerPage);
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+  // Configuración de columnas para la tabla de reportes
+  const columnas = [
+    { key: 'id', label: 'IDReporte' },
+    { key: 'tipo', label: 'Tipo de reporte' },
+    { key: 'fecha', label: 'Fecha' },
+    { key: 'parametros', label: 'Parámetros' },
+  ];
 
   return (
-    <Box display="flex" flexDirection="column" gap={3} bgcolor="#F4FFF8" p={3}>
+    <Box display="flex" flexDirection="column" gap={2} bgcolor="#F4FFF8">
+      {/* Título de la página */}
       <Typography
         variant="h2"
         sx={{
@@ -98,6 +60,24 @@ function Reports() {
         Reportes
       </Typography>
 
+      {/* Botón para generar nuevo reporte */}
+      <Box display="flex" justifyContent="flex-end">
+        <Button
+          variant="contained"
+          startIcon={<AssessmentIcon />}
+          onClick={handleAdd}
+          sx={{
+            backgroundColor: '#8BAAAD',
+            '&:hover': {
+              backgroundColor: '#6B8A8D',
+            },
+          }}
+        >
+          Generar Nuevo Reporte
+        </Button>
+      </Box>
+
+      {/* Sección de reportes destacados */}
       <Box
         sx={{
           display: 'flex',
@@ -114,57 +94,20 @@ function Reports() {
         ))}
       </Box>
 
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Box display="flex" gap={2}>
-          <SearchBar
-            placeholder="Buscar reporte"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <Button
-            variant="contained"
-            startIcon={<SearchIcon />}
-            onClick={handleBuscarClick}
-          >
-            Buscar
-          </Button>
-        </Box>
+      {/* Tabla de reportes */}
+      <TableComponent
+        columnas={columnas}
+        filas={reportes}
+        ViewIconVisible={true}
+        EditIconVisible={true}
+        DeleteIconVisible={true}
+      />
 
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAdd}
-        >
-          Nuevo Reporte
-        </Button>
-      </Box>
-
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        {reportesPaginados.map((reporte) => (
-          <ReporteCard
-            key={reporte.id}
-            reporte={reporte}
-            onView={handleView}
-            onEdit={handleEdit}
-            onCopy={handleCopy}
-            onDownload={handleDownload}
-            onDelete={handleDelete}
-          />
-        ))}
-      </Box>
-
-      {totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={2}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handleChangePage}
-            color="primary"
-            size="large"
-          />
-        </Box>
-      )}
+      {/* Modal para generar nuevo reporte */}
+      <ModalReporte
+        open={open}
+        onClose={() => setOpen(false)}
+      />
     </Box>
   );
 }
