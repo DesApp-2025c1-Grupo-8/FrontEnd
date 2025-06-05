@@ -18,9 +18,10 @@ function Documents() {
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleCopy = (remito) => alert(`Copiar remito: ${remito.numeroRemito}`);
-  const handleDelete = (remito) => alert(`Eliminar remito: ${remito.numeroRemito}`);
-  const handleDownload = (remito) => alert(`Descargar remito: ${remito.numeroRemito}`);
+  const handleDelete = (remito) =>
+    alert(`Eliminar remito: ${remito.numeroRemito}`);
+  const handleDownload = (remito) =>
+    alert(`Descargar remito: ${remito.numeroRemito}`);
 
   const remitosFiltrados = useMemo(() => {
     if (!searchTerm) return remitos;
@@ -35,13 +36,13 @@ function Documents() {
 
   const handleBuscarClick = () => {
     setSearchTerm(searchInput.trim());
-    setPage(1); 
+    setPage(1);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       setSearchTerm(searchInput.trim());
-      setPage(1); 
+      setPage(1);
     }
   };
 
@@ -67,7 +68,6 @@ function Documents() {
     setOpen(true);
   };
 
-
   const totalPages = Math.ceil(remitosFiltrados.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
   const remitosPaginados = remitosFiltrados.slice(
@@ -92,8 +92,20 @@ function Documents() {
         Gestión de Remitos
       </Typography>
 
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Box display="flex" gap={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{
+          flexDirection: { xs: "column", sm: "row" },
+          gap: { xs: 2, sm: 0 },
+        }}
+      >
+        <Box
+          display="flex"
+          gap={2}
+          sx={{ flexDirection: { xs: "column", sm: "row" } }}
+        >
           <SearchBar
             placeholder="Buscar remito"
             value={searchInput}
@@ -118,39 +130,17 @@ function Documents() {
         </Button>
       </Box>
 
-      <Grid 
-        container 
-        spacing={2} 
-        direction="column"
-        alignItems="center"
-        sx={{
-          width: "100%",
-          margin: "0 auto",
-          maxWidth: "900px",
-        }}
-      >
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {remitosPaginados.map((remito) => (
-          <Grid 
-            item 
-            xs={12}
-            key={remito.numeroRemito || remito.id}
-            sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <RemitoCard
-              remito={remito}
-              onView={handleView}
-              onEdit={handleEdit}
-              onCopy={handleCopy}
-              onDelete={handleDelete}
-              onDownload={handleDownload}
-            />
-          </Grid>
+          <RemitoCard
+            remito={remito}
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onDownload={handleDownload}
+          />
         ))}
-      </Grid>
+      </Box>
 
       {totalPages > 1 && (
         <Box display="flex" justifyContent="center" mt={2}>
