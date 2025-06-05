@@ -46,11 +46,6 @@ function Varios() {
     }
   };
 
-  // Calcular paginación para Estados
-  const totalPagesEstados = Math.ceil(estadosFiltrados.length / itemsPerPageEstados);
-  const startIndexEstados = (pageEstados - 1) * itemsPerPageEstados;
-  const estadosPaginados = estadosFiltrados.slice(startIndexEstados, startIndexEstados + itemsPerPageEstados);
-
   const handleChangePageEstados = (event, newPage) => {
     setPageEstados(newPage);
   };
