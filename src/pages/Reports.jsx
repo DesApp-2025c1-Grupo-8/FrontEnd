@@ -1,19 +1,20 @@
-import React from 'react';
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Typography,
+  Button,
   Pagination,
-  Select,
-  MenuItem,
-  FormControl,
 } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import { useSelector } from 'react-redux';
 import { selectReportes } from '../redux/reportes/reportesSlice';
-
-import TableComponent from '../components/TableComponent'; // Importar nuevo componente
 import ReporteDestacadoBox from '../components/ReporteDestacadoBox';
+import ModalReporte from "../components/ModalReporte";
+import SearchBar from '../components/SearchBar';
+import TableComponent from '../components/TableComponent';
 
+// Lista de reportes destacados que se muestran en la parte superior
 const reportesDestacados = [
   {
     titulo: 'Volumen total de mercadería por cliente/período',
@@ -29,11 +30,15 @@ const reportesDestacados = [
   },
 ];
 
+/**
+ * Componente principal de la página de Reportes
+ * @returns {JSX.Element} - Página completa de reportes
+ */
 function Reports() {
-  // Ya no necesitamos cantidad y pagina, porque TableComponent maneja su propia paginación
+    // Ya no necesitamos cantidad y pagina, porque TableComponent maneja su propia paginación
   const reportes = useSelector(selectReportes);
 
-  // Define columnas para TableComponent (usa las keys de tus objetos de reportes)
+  // Configuración de columnas para la tabla de reportes
   const columnas = [
     { key: 'id', label: 'IDReporte' },
     { key: 'tipo', label: 'Tipo de reporte' },
@@ -41,19 +46,9 @@ function Reports() {
     { key: 'parametros', label: 'Parámetros' },
   ];
 
-  // Manejo de acciones
-  const handleView = (row) => alert(`Ver reporte: ${row.id}`);
-  const handleEdit = (row) => alert(`Editar reporte: ${row.id}`);
-  const handleCopy = (row) => alert(`Copiar reporte: ${row.id}`);
-  const handleDelete = (row) => {
-    if (window.confirm(`¿Seguro que deseas eliminar el reporte ${row.id}?`)) {
-      alert(`Reporte eliminado: ${row.id}`);
-    }
-  };
-
   return (
-    <Box sx={{ p: { xs: 1, sm: 3 } }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+    <Box display="flex" flexDirection="column" gap={2} bgcolor="#F4FFF8">
+      {/* Título de la página */}
       <Typography
         variant="h2"
         sx={{
@@ -65,14 +60,30 @@ function Reports() {
         Reportes
       </Typography>
 
+      {/* Botón para generar nuevo reporte */}
+      <Box display="flex" justifyContent="flex-end">
+        <Button
+          variant="contained"
+          startIcon={<AssessmentIcon />}
+          onClick={handleAdd}
+          sx={{
+            backgroundColor: '#8BAAAD',
+            '&:hover': {
+              backgroundColor: '#6B8A8D',
+            },
+          }}
+        >
+          Generar Nuevo Reporte
+        </Button>
       </Box>
 
+      {/* Sección de reportes destacados */}
       <Box
         sx={{
           display: 'flex',
           gap: 4,
           flexWrap: 'wrap',
-          mb: 4,
+          mb: 2,
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: { xs: 'column', sm: 'row' },
@@ -83,17 +94,19 @@ function Reports() {
         ))}
       </Box>
 
+      {/* Tabla de reportes */}
       <TableComponent
         columnas={columnas}
         filas={reportes}
-        onView={handleView}
-        onEdit={handleEdit}
-        onCopy={handleCopy}
-        onDelete={handleDelete}
         ViewIconVisible={true}
         EditIconVisible={true}
         DeleteIconVisible={true}
-        DownloadIconVisible={true} // Si no usas descarga por ahora
+      />
+
+      {/* Modal para generar nuevo reporte */}
+      <ModalReporte
+        open={open}
+        onClose={() => setOpen(false)}
       />
     </Box>
   );
