@@ -16,10 +16,10 @@ import DownloadIcon from "@mui/icons-material/Download";
 import DescriptionIcon from "@mui/icons-material/Description";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
-function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) {
+function ReporteCard({ reporte, onView, onEdit, onDelete, onDownload }) {
   const getTipoColor = (tipo) => {
     if (tipo.includes("Volumen")) return "#2196f3"; // Azul
-    if (tipo.includes("Distribución")) return "#4caf50"; // Verde  
+    if (tipo.includes("Distribución")) return "#4caf50"; // Verde
     if (tipo.includes("Análisis")) return "#ffc107"; // Amarillo
     return "#757575"; // Gris por defecto
   };
@@ -35,7 +35,6 @@ function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) 
     <Card
       sx={{
         width: "100%",
-        minWidth: "520px", // Límite mínimo de ancho
         backgroundColor: "#f6fffa",
         "&:hover": {
           backgroundColor: "rgba(139, 170, 173, 0.15)",
@@ -67,14 +66,16 @@ function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) 
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              minWidth: 100,
               gap: 1,
               flexShrink: 0,
             }}
           >
             <Box
               sx={{
-                display: "flex",
+                display: {
+                  xs: "none",
+                  sm: "flex",
+                },
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
@@ -85,8 +86,17 @@ function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) 
                 border: "2px solid #ff9800",
               }}
             >
-              <DescriptionIcon sx={{ color: "#ff9800", fontSize: "1.8rem", mb: 0.3 }} />
-              <Typography variant="caption" sx={{ color: "#ff9800", fontWeight: "bold", fontSize: "0.65rem" }}>
+              <DescriptionIcon
+                sx={{ color: "#ff9800", fontSize: "1.8rem", mb: 0.3 }}
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "#ff9800",
+                  fontWeight: "bold",
+                  fontSize: "0.65rem",
+                }}
+              >
                 {reporte.id}
               </Typography>
             </Box>
@@ -100,6 +110,7 @@ function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) 
                 fontWeight: "bold",
                 height: 22,
                 minWidth: 80,
+                display: { xs: "none", sm: "inline-flex" },
               }}
             />
           </Box>
@@ -108,11 +119,11 @@ function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) 
           <Box sx={{ flex: 1, minWidth: 0 }}>
             {/* Línea 1: Tipo de Reporte */}
             <Box sx={{ mb: 1.2 }}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: "bold", 
-                  fontSize: "1.15rem", 
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1.15rem",
                   mb: 0.4,
                   color: "#ff9800",
                 }}
@@ -120,23 +131,35 @@ function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) 
                 {reporte.tipo}
               </Typography>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <CalendarTodayIcon sx={{ fontSize: "0.85rem", color: "text.secondary" }} />
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.9rem" }}>
+                <CalendarTodayIcon
+                  sx={{ fontSize: "0.85rem", color: "text.secondary" }}
+                />
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ fontSize: "0.9rem" }}
+                >
                   Fecha: {reporte.fecha}
                 </Typography>
               </Box>
             </Box>
-
-
           </Box>
 
           {/* Acciones */}
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, ml: 2, flexShrink: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.5,
+              ml: 2,
+              flexShrink: 0,
+            }}
+          >
             <Tooltip title="Ver detalles">
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 onClick={() => onView && onView(reporte)}
-                sx={{ 
+                sx={{
                   backgroundColor: "#e3f2fd",
                   "&:hover": { backgroundColor: "#bbdefb" },
                   width: 32,
@@ -147,10 +170,10 @@ function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) 
               </IconButton>
             </Tooltip>
             <Tooltip title="Editar">
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 onClick={() => onEdit && onEdit(reporte)}
-                sx={{ 
+                sx={{
                   backgroundColor: "#e8f5e8",
                   "&:hover": { backgroundColor: "#c8e6c9" },
                   width: 32,
@@ -160,25 +183,11 @@ function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) 
                 <EditIcon sx={{ fontSize: "0.9rem" }} />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Copiar">
-              <IconButton 
-                size="small" 
-                onClick={() => onCopy && onCopy(reporte)}
-                sx={{ 
-                  backgroundColor: "#fff3e0",
-                  "&:hover": { backgroundColor: "#ffe0b2" },
-                  width: 32,
-                  height: 32,
-                }}
-              >
-                <FileCopyIcon sx={{ fontSize: "0.9rem" }} />
-              </IconButton>
-            </Tooltip>
             <Tooltip title="Descargar">
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 onClick={() => onDownload && onDownload(reporte)}
-                sx={{ 
+                sx={{
                   backgroundColor: "#f3e5f5",
                   "&:hover": { backgroundColor: "#e1bee7" },
                   width: 32,
@@ -189,10 +198,10 @@ function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) 
               </IconButton>
             </Tooltip>
             <Tooltip title="Eliminar">
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 onClick={() => onDelete && onDelete(reporte)}
-                sx={{ 
+                sx={{
                   backgroundColor: "#ffebee",
                   "&:hover": { backgroundColor: "#ffcdd2" },
                   width: 32,
@@ -209,4 +218,4 @@ function ReporteCard({ reporte, onView, onEdit, onCopy, onDelete, onDownload }) 
   );
 }
 
-export default ReporteCard; 
+export default ReporteCard;
