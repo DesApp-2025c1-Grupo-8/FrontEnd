@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Typography,
   Button,
+  Pagination,
 } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import { useSelector } from 'react-redux';
 import { selectReportes } from '../redux/reportes/reportesSlice';
-
-import TableComponent from '../components/TableComponent';
 import ReporteDestacadoBox from '../components/ReporteDestacadoBox';
 import ModalReporte from "../components/ModalReporte";
+import SearchBar from '../components/SearchBar';
+import TableComponent from '../components/TableComponent';
 
 // Lista de reportes destacados que se muestran en la parte superior
 const reportesDestacados = [
@@ -34,15 +35,7 @@ const reportesDestacados = [
  * @returns {JSX.Element} - Página completa de reportes
  */
 function Reports() {
-  // Estado para controlar la visibilidad del modal de nuevo reporte
-  const [open, setOpen] = useState(false);
-
-  // Manejador para abrir el modal de nuevo reporte
-  const handleAdd = () => {
-    setOpen(true);
-  };
-
-  // Obtener la lista de reportes desde Redux
+    // Ya no necesitamos cantidad y pagina, porque TableComponent maneja su propia paginación
   const reportes = useSelector(selectReportes);
 
   // Configuración de columnas para la tabla de reportes
@@ -90,7 +83,7 @@ function Reports() {
           display: 'flex',
           gap: 4,
           flexWrap: 'wrap',
-          mb: 4,
+          mb: 2,
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: { xs: 'column', sm: 'row' },
