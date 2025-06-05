@@ -22,7 +22,6 @@ src/
 ├── pages/              # Páginas principales de la aplicación  
 ├── redux/              # Gestión de estado global (slices, DTOs)
 ├── services/           # Servicios para comunicación con APIs
-├── hooks/              # Hooks personalizados para lógica reutilizable
 ├── utilidades/         # Funciones auxiliares y configuraciones
 └── tags/               # Componentes específicos de etiquetado
 ```
@@ -62,13 +61,6 @@ Se utiliza **Material-UI ** como biblioteca principal de componentes, ofreciendo
 - Sistema de temas personalizable
 - Componentes responsivos out-of-the-box
 - Iconos consistentes con Material Icons
-
-### 🔗 Comunicación con API
-Los servicios de API están implementados con:
-- Fetch API nativo para llamadas HTTP
-- Transformación automática de datos con DTOs
-- Manejo robusto de errores
-- Configuración centralizada de endpoints
 
 
 ## 📚 Scripts Disponibles
