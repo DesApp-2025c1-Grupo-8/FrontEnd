@@ -194,11 +194,13 @@ function RemitoCard({ remito, onView, onEdit, onDelete, onDownload }) {
                 label={formatEstado(remito.estado)}
                 size="small"
                 sx={{
-                  backgroundColor: getEstadoColor(remito.estado),
-                  color: "white",
+                  backgroundColor: "#f6fffa",
+                  color: getEstadoColor(remito.estado),
                   fontSize: "0.75rem",
                   fontWeight: "bold",
                   height: 26,
+                  border: "1px solid",
+                  borderColor: getEstadoColor(remito.estado),
                   ml: 1,
                 }}
               />
