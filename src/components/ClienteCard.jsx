@@ -37,7 +37,6 @@ function ClienteCard({ cliente, onView, onEdit, onCopy, onDelete }) {
     <Card
       sx={{
         width: "100%",
-        minWidth: "520px", // Límite mínimo de ancho
         backgroundColor: "#f6fffa",
         "&:hover": {
           backgroundColor: "rgba(139, 170, 173, 0.15)",
@@ -82,13 +81,13 @@ function ClienteCard({ cliente, onView, onEdit, onCopy, onDelete }) {
                 justifyContent: "center",
                 width: 70,
                 height: 70,
-                backgroundColor: "#e3f2fd",
+                backgroundColor: "#f6fffa",
                 borderRadius: 2,
-                border: "2px solid #2696a6",
+                border: "2px solid #028090",
               }}
             >
-              <BusinessIcon sx={{ color: "#2696a6", fontSize: "1.8rem", mb: 0.3 }} />
-              <Typography variant="caption" sx={{ color: "#2696a6", fontWeight: "bold", fontSize: "0.65rem" }}>
+              <BusinessIcon sx={{fontSize: "1.8rem", mb: 0.3 }} color="primary"/>
+              <Typography variant="caption" sx={{fontWeight: "bold", fontSize: "0.65rem" }} color="primary">
                 {cliente.IUC}
               </Typography>
             </Box>
@@ -96,12 +95,14 @@ function ClienteCard({ cliente, onView, onEdit, onCopy, onDelete }) {
               label={cliente.tipo}
               size="small"
               sx={{
-                backgroundColor: getTipoColor(cliente.tipo),
-                color: "white",
+                backgroundColor: "#f6fffa",
+                color: getTipoColor(cliente.tipo),
                 fontSize: "0.75rem",
                 fontWeight: "bold",
                 height: 26,
                 minWidth: 80,
+                border: "1px solid",
+                borderColor: getTipoColor(cliente.tipo),
               }}
             />
           </Box>
@@ -116,11 +117,8 @@ function ClienteCard({ cliente, onView, onEdit, onCopy, onDelete }) {
                    fontWeight: "bold", 
                    fontSize: "1.15rem", 
                    mb: 0.4,
-                   overflow: "hidden",
-                   textOverflow: "ellipsis",
-                   whiteSpace: "nowrap",
-                   color: "#2696a6",
                  }}
+                 color="primary"
                >
                  {cliente.razonSocial}
                </Typography>
@@ -145,9 +143,6 @@ function ClienteCard({ cliente, onView, onEdit, onCopy, onDelete }) {
                     sx={{ 
                       fontWeight: "bold", 
                       fontSize: "0.9rem",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
                       flex: 1
                     }}
                   >

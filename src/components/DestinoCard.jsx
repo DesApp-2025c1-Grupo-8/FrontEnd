@@ -66,7 +66,7 @@ function DestinoCard({ destino, onView, onEdit, onCopy, onDelete }) {
                 justifyContent: "center",
                 width: 70,
                 height: 70,
-                backgroundColor: "#F4FFF8",
+                backgroundColor: "#f6fffa",
                 borderRadius: 2,
                 border: "2px solid #028090",
               }}
@@ -89,7 +89,7 @@ function DestinoCard({ destino, onView, onEdit, onCopy, onDelete }) {
                 fontWeight: "bold",
                 fontSize: "0.7rem",
                 textAlign: "center",
-                backgroundColor: "#F4FFF8",
+                backgroundColor: "#f6fffa",
                 px: 1,
                 py: 0.3,
                 borderRadius: 1,
