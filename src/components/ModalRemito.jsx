@@ -641,9 +641,9 @@ function ModalRemito({ open, onClose, modo = 'alta', remito = null }) {
                 <Box display="flex" alignItems="center">
                   <Button
                     variant="outlined"
-                    sx={{ mb: 2, flexShrink: 0 }}
+                    sx={{ mb: 2, flexShrink: 0, backgroundColor: "#028090" }}
                     disabled={!camposEditables}
-                    color={errores.documentacion ? 'error' : 'primary'}
+                    color="primary"
                     startIcon={<CloudDownloadIcon />}
                   >
                     Adjuntar documento
