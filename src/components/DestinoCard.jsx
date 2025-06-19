@@ -106,7 +106,7 @@ function DestinoCard({ destino, onView, onEdit, onCopy, onDelete }) {
             {/* Línea 1: Dirección completa */}
             <Box sx={{ mb: 1.2 }}>
               <Typography
-                variant="h6"
+                variant="body1"
                 sx={{
                   fontWeight: "bold",
                   fontSize: "1.15rem",
@@ -114,20 +114,17 @@ function DestinoCard({ destino, onView, onEdit, onCopy, onDelete }) {
                 }}
                 color="primary"
               >
+                {destino.nombre}
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontSize: "1.15rem",
+                  mb: 0.4,
+                }}
+              >
                 {destino.calle} {destino.altura}
               </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <PlaceIcon
-                  sx={{ fontSize: "0.85rem", color: "text.secondary" }}
-                />
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ fontSize: "0.9rem" }}
-                >
-                  {destino.localidad}, {destino.municipio}
-                </Typography>
-              </Box>
             </Box>
 
             {/* Línea 2: Información de Ubicación */}
@@ -136,27 +133,21 @@ function DestinoCard({ destino, onView, onEdit, onCopy, onDelete }) {
               <Box
                 sx={{
                   display: "flex",
-                  flexDirection: { xs:"column",sm: "column", md: "row" },
+                  flexDirection: { xs: "column", sm: "column", md: "row" },
                   //alignItems: "center",
                   gap: 4,
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    minWidth: 200,
-                  }}
-                >
-                  <PublicIcon
-                    sx={{ fontSize: "0.8rem", color: "text.secondary" }}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <PlaceIcon
+                    sx={{ fontSize: "0.85rem", color: "text.secondary" }}
                   />
                   <Typography
                     variant="body2"
-                    sx={{ fontSize: "0.8rem", fontWeight: "500" }}
+                    color="text.secondary"
+                    sx={{ fontSize: "0.9rem" }}
                   >
-                    {destino.pais}
+                    {destino.localidad}, {destino.municipio}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>

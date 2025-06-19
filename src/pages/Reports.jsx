@@ -47,7 +47,6 @@ function Reports() {
 
   // Manejo de acciones
   const handleView = (reporte) => alert(`Ver reporte: ${reporte.id}`);
-  const handleEdit = (reporte) => alert(`Editar reporte: ${reporte.id}`);
   const handleDownload = (reporte) => alert(`Descargar reporte: ${reporte.id}`);
   const handleDelete = (reporte) => {
     if (
@@ -134,7 +133,6 @@ function Reports() {
             key={reporte.id}
             reporte={reporte}
             onView={handleView}
-            onEdit={handleEdit}
             onDownload={handleDownload}
             onDelete={handleDelete}
           />

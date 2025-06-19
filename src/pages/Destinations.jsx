@@ -27,11 +27,10 @@ function Destinations() {
       localidad = "",
       codigo_postal = "",
       provincia = "",
-      pais = "",
     } = row;
 
     const direccionFormateada =
-      `${calle}, ${altura}, ${municipio}, ${localidad}, CP:${codigo_postal}, ${provincia}, ${pais}`.trim();
+      `${calle}, ${altura}, ${municipio}, ${localidad}, CP:${codigo_postal}, ${provincia}, Argentina`.trim();
 
     navigator.clipboard
       .writeText(direccionFormateada)
@@ -135,7 +134,7 @@ function Destinations() {
           startIcon={<PersonAddIcon />}
           onClick={handleAdd}
         >
-          Nuevo Destino
+          Nueva Dirección
         </Button>
       </Box>
 
