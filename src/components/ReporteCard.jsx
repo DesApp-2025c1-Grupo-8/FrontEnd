@@ -16,7 +16,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import DescriptionIcon from "@mui/icons-material/Description";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
-function ReporteCard({ reporte, onView, onEdit, onDelete, onDownload }) {
+function ReporteCard({ reporte, onView, onDelete, onDownload }) {
   const getTipoColor = (tipo) => {
     if (tipo.includes("Volumen")) return "#2196f3"; // Azul
     if (tipo.includes("Distribución")) return "#4caf50"; // Verde
@@ -167,20 +167,6 @@ function ReporteCard({ reporte, onView, onEdit, onDelete, onDownload }) {
                 }}
               >
                 <VisibilityIcon sx={{ fontSize: "0.9rem" }} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Editar">
-              <IconButton
-                size="small"
-                onClick={() => onEdit && onEdit(reporte)}
-                sx={{
-                  backgroundColor: "#e8f5e8",
-                  "&:hover": { backgroundColor: "#c8e6c9" },
-                  width: 32,
-                  height: 32,
-                }}
-              >
-                <EditIcon sx={{ fontSize: "0.9rem" }} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Descargar">

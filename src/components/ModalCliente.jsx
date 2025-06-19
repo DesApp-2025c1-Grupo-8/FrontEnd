@@ -1,9 +1,6 @@
-// Este componente maneja la creación, edición y visualización de información de clientes.
-// Permite tres modos de operación: alta (crear nuevo cliente), modificación (editar cliente existente)
-// y consulta (ver información del cliente).
+"use client";
 
-import React, { useState, useEffect } from 'react';
-// Importaciones de componentes de Material-UI para la interfaz
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,185 +13,265 @@ import {
   Box,
   Tooltip,
   Button,
-} from '@mui/material';
-// Importaciones de iconos de Material-UI
-import CloseIcon from '@mui/icons-material/Close';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SaveIcon from "@mui/icons-material/Save";
 
-// Definición de los tipos de cliente disponibles en el sistema
+import { useSelector } from "react-redux";
+import { selectDestinos } from "../redux/destinos/destinosSlice";
+
+// Importar validaciones y filtros
+import {
+  validarStringObligatorio,
+  validarCUIT,
+  validarEmail,
+  validarTelefonoCliente,
+} from "../utilidades/validations";
+import {
+  formatearCUIT,
+  soloLetrasYEspacios,
+  soloNumeros,
+} from "../utilidades/input-filters";
+
 const tiposCliente = [
-  { value: 'empresa privada', label: 'Empresa Privada' },
-  { value: 'organismo estatal', label: 'Organismo Estatal' },
-  { value: 'particular', label: 'Particular' },
+  { value: "privado", label: "Privada" },
+  { value: "estatal", label: "Estatal" },
+  { value: "particular", label: "Particular" },
 ];
 
-// Lista de campos que son obligatorios para el registro de un cliente
-const camposObligatorios = [
-  'razonSocial',
-  'cuit',
-  'tipoCliente',
-  'continente',
-  'pais',
-  'provincia',
-  'municipio',
-  'calle',
-  'altura',
-  'telefono',
-  'email',
-  'personasAutorizadas',
-];
-
-// Valores iniciales para el formulario de cliente
 const camposIniciales = {
-  razonSocial: '',
-  cuit: '',
-  tipoCliente: '',
-  continente: '',
-  pais: '',
-  provincia: '',
-  municipio: '',
-  calle: '',
-  altura: '',
-  telefono: '',
-  email: '',
-  personasAutorizadas: '',
+  razonSocial: "",
+  cuit: "",
+  tipo: "",
+  direccionId: "",
+  provincia: "",
+  municipio: "",
+  localidad: "",
+  calle: "",
+  altura: "",
+  telefono: "",
+  email: "",
+  personasAutorizadas: "",
 };
 
-function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
-  // Estados del componente
-  const [form, setForm] = useState(camposIniciales); // Estado del formulario
-  const [errores, setErrores] = useState({}); // Estado de errores de validación
-  const [mensajesError, setMensajesError] = useState({}); // Mensajes de error específicos
-  const [modoInterno, setModoInterno] = useState(modo); // Modo interno del modal
+function ModalCliente({ open, onClose, modo = "alta", cliente = null }) {
+  const [form, setForm] = useState(camposIniciales);
+  const [errores, setErrores] = useState({});
+  const [modoInterno, setModoInterno] = useState(modo);
 
-  // Efecto que se ejecuta cuando cambia el modo o se abre el modal
+  const destinos = useSelector(selectDestinos);
+
+  //const esConsulta = modo === "consulta"
+
   useEffect(() => {
-    if (modo === 'alta') {
-      setForm(camposIniciales);
-      setModoInterno('alta');
-    } else if (cliente) {
-      setForm({ ...cliente });
-      setModoInterno(modo);
-    }
-    setErrores({});
-  }, [open, modo, cliente]);
+    if (open) {
+      if (modo === "alta") {
+        setForm(camposIniciales);
+        setModoInterno("alta");
+      } else if (cliente) {
+        // Mapear los datos del cliente al formulario
+        const clienteFormateado = {
+          razonSocial: cliente.razonSocial || "",
+          cuit: cliente["CUIT/RUT"] || "",
+          tipo: cliente.tipo || "",
+          direccionId: cliente.direccion || "",
+          telefono: cliente.telefono || "",
+          email: cliente.email || "",
+          personasAutorizadas: cliente.personasAutorizadas || "",
+          provincia: "",
+          municipio: "",
+          localidad: "",
+          calle: "",
+          altura: "",
+        };
 
-  // Maneja los cambios en los campos del formulario
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+        // Si hay una dirección seleccionada, buscar los datos completos
+        if (cliente.direccion) {
+          const destinoSeleccionado = destinos.find(
+            (dest) => dest.id === cliente.direccion
+          );
+          if (destinoSeleccionado) {
+            clienteFormateado.provincia = destinoSeleccionado.provincia || "";
+            clienteFormateado.municipio = destinoSeleccionado.municipio || "";
+            clienteFormateado.localidad = destinoSeleccionado.localidad || "";
+            clienteFormateado.calle = destinoSeleccionado.calle || "";
+            clienteFormateado.altura = destinoSeleccionado.altura || "";
+          }
+        }
+
+        setForm(clienteFormateado);
+        setModoInterno(modo);
+      }
+      setErrores({});
+    }
+  }, [open, modo, cliente, destinos]);
+
+  // Efecto para sincronizar los campos de dirección cuando cambia direccionId
+  useEffect(() => {
+    if (
+      form.direccionId &&
+      (modoInterno === "alta" || modoInterno === "modificacion")
+    ) {
+      const destinoSeleccionado = destinos.find(
+        (dest) => dest.id === form.direccionId
+      );
+      if (destinoSeleccionado) {
+        setForm((prev) => ({
+          ...prev,
+          provincia: destinoSeleccionado.provincia || "",
+          municipio: destinoSeleccionado.municipio || "",
+          localidad: destinoSeleccionado.localidad || "",
+          calle: destinoSeleccionado.calle || "",
+          altura: destinoSeleccionado.altura || "",
+        }));
+      }
+    } else if (
+      !form.direccionId &&
+      (modoInterno === "alta" || modoInterno === "modificacion")
+    ) {
+      setForm((prev) => ({
+        ...prev,
+        provincia: "",
+        municipio: "",
+        localidad: "",
+        calle: "",
+        altura: "",
+      }));
+    }
+  }, [form.direccionId, destinos, modoInterno]);
+
+  // Función para validar un campo individual
+  const validarCampo = (name, value) => {
+    switch (name) {
+      case "razonSocial":
+        return validarStringObligatorio(value, "Razón Social");
+      case "cuit":
+        return validarCUIT(value);
+      case "tipo":
+        return validarStringObligatorio(value, "Tipo de Cliente");
+      case "direccionId":
+        return validarStringObligatorio(value, "Dirección");
+      case "telefono":
+        return validarTelefonoCliente(value);
+      case "email":
+        return validarEmail(value);
+      case "personasAutorizadas":
+        return validarStringObligatorio(value, "Personas Autorizadas");
+      default:
+        return "";
+    }
   };
 
-  // Valida todos los campos del formulario según las reglas de negocio
-  const validar = () => {
+  // Función para validar todo el formulario
+  const validarFormulario = () => {
     const nuevosErrores = {};
-    const mensajesError = {};
 
-    // Validación de campos obligatorios
+    // Validar campos obligatorios
+    const camposObligatorios = [
+      "razonSocial",
+      "cuit",
+      "tipo",
+      "direccionId",
+      "telefono",
+      "email",
+      "personasAutorizadas",
+    ];
+
     camposObligatorios.forEach((campo) => {
-      if (!form[campo] || form[campo].toString().trim() === '') {
-        nuevosErrores[campo] = true;
-      }
+      nuevosErrores[campo] = validarCampo(campo, form[campo]);
     });
 
-    // Validación de CUIT/RUT
-    if (form.cuit && !/^\d{2}-\d{8}-\d{1}$/.test(form.cuit) && !/^\d{2}\.\d{3}\.\d{3}-\d{1}$/.test(form.cuit)) {
-      nuevosErrores.cuit = true;
-      mensajesError.cuit = 'El CUIT debe tener formato XX-XXXXXXXX-X o el RUT formato XX.XXX.XXX-X';
-    }
-
-    // Validación de email
-    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      nuevosErrores.email = true;
-      mensajesError.email = 'Ingrese un email válido';
-    }
-
-    // Validación de teléfono
-    if (form.telefono && !/^\d+$/.test(form.telefono)) {
-      nuevosErrores.telefono = true;
-      mensajesError.telefono = 'El teléfono debe contener solo números';
-    }
-
-    // Validación de altura
-    if (form.altura && !/^\d+$/.test(form.altura)) {
-      nuevosErrores.altura = true;
-      mensajesError.altura = 'La altura debe contener solo números';
-    }
-
-    // Validación de continente
-    if (form.continente && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.]+$/.test(form.continente)) {
-      nuevosErrores.continente = true;
-      mensajesError.continente = 'El continente debe contener solo letras';
-    }
-
-    // Validación de país
-    if (form.pais && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.]+$/.test(form.pais)) {
-      nuevosErrores.pais = true;
-      mensajesError.pais = 'El país debe contener solo letras';
-    }
-
-    // Validación de provincia
-    if (form.provincia && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.]+$/.test(form.provincia)) {
-      nuevosErrores.provincia = true;
-      mensajesError.provincia = 'La provincia debe contener solo letras';
-    }
-
-    // Validación de municipio
-    if (form.municipio && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.]+$/.test(form.municipio)) {
-      nuevosErrores.municipio = true;
-      mensajesError.municipio = 'El municipio debe contener solo letras';
-    }
-
-    // Validación de calle
-    if (form.calle && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.]+$/.test(form.calle)) {
-      nuevosErrores.calle = true;
-      mensajesError.calle = 'La calle debe contener solo letras y/o números';
-    }
-
     setErrores(nuevosErrores);
-    setMensajesError(mensajesError);
-    return Object.keys(nuevosErrores).length === 0;
+    return Object.values(nuevosErrores).every((msg) => msg === "");
   };
 
-  // Maneja el guardado del formulario
+  // Manejar cambios en los campos con validación en tiempo real
+  const handleChangeCampo = (e) => {
+    const { name, value } = e.target;
+    let valorFiltrado = value;
+
+    // Aplicar filtros según el campo
+    switch (name) {
+      case "razonSocial":
+        // Permitir letras, números, espacios y algunos caracteres especiales para nombres de empresas
+        valorFiltrado = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.\-&]/g, "");
+        break;
+      case "cuit":
+        valorFiltrado = formatearCUIT(value);
+        break;
+      case "telefono":
+        valorFiltrado = soloNumeros(value);
+        break;
+      case "personasAutorizadas":
+        valorFiltrado = soloLetrasYEspacios(value);
+        break;
+      default:
+        valorFiltrado = value;
+    }
+
+    // Actualizar el formulario
+    setForm((prev) => ({ ...prev, [name]: valorFiltrado }));
+
+    // Validar el campo y actualizar errores
+    const mensajeError = validarCampo(name, valorFiltrado);
+    setErrores((prev) => ({ ...prev, [name]: mensajeError }));
+  };
+
   const handleGuardar = () => {
-    validar();
+    if (!validarFormulario()) {
+      console.warn("Hay errores en el formulario. No se puede guardar.");
+      return;
+    }
+
+    console.log("Cliente guardado:", form);
+    onClose();
   };
 
-  // Cambia el modo del modal a 'modificacion'
   const handleEditar = () => {
-    setModoInterno('modificacion');
+    setModoInterno("modificacion");
   };
 
-  // Maneja la eliminación del cliente
   const handleEliminar = () => {
-    // Solo visual de momento
+    if (window.confirm("¿Está seguro que desea eliminar este cliente?")) {
+      console.log("Eliminar cliente:", cliente);
+      onClose();
+    }
   };
 
-  // Determina si los campos son editables según el modo
-  const camposEditables = modoInterno === 'alta' || modoInterno === 'modificacion';
+  const camposEditables =
+    modoInterno === "alta" || modoInterno === "modificacion";
 
   const getTitulo = () => {
-    if (modoInterno === 'alta') return 'Nuevo Cliente';
-    if (modoInterno === 'modificacion') return 'Editar Cliente';
-    return 'Información del Cliente';
+    if (modoInterno === "alta") return "Nuevo Cliente";
+    if (modoInterno === "modificacion") return "Editar Cliente";
+    return "Información del Cliente";
   };
 
-  // Renderizado del componente
   return (
-    // Modal principal que contiene el formulario
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      {/* Contenedor principal con borde y estilo */}
-      <Box sx={{ border: '3px solid #0097a7', borderRadius: 3, m: 1, position: 'relative' }}>
-        {/* Encabezado del modal con título y botones de acción */}
-        <DialogTitle sx={{ pb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h5" fontWeight="bold">{getTitulo()}</Typography>
+      <Box
+        sx={{
+          border: "3px solid #0097a7",
+          borderRadius: 3,
+          m: 1,
+          position: "relative",
+        }}
+      >
+        <DialogTitle
+          sx={{
+            pb: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold">
+            {getTitulo()}
+          </Typography>
           <Box>
-            {/* Botones de editar y eliminar solo visibles en modo consulta */}
-            {modoInterno === 'consulta' && (
+            {modoInterno === "consulta" && (
               <>
                 <Tooltip title="Editar">
                   <IconButton onClick={handleEditar}>
@@ -208,7 +285,6 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
                 </Tooltip>
               </>
             )}
-            {/* Botón para cerrar el modal */}
             <Tooltip title="Cerrar">
               <IconButton onClick={onClose}>
                 <CloseIcon />
@@ -216,219 +292,231 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
             </Tooltip>
           </Box>
         </DialogTitle>
-        {/* Contenido principal del modal */}
         <DialogContent>
-          {/* Sección de información del cliente */}
-          <Box sx={{ border: '1px solid #b2ebf2', borderRadius: 2, p: 2, mt: 2 }}>
-            <Typography variant="subtitle1" sx={{ color: '#0097a7', fontWeight: 'bold', mb: 2, borderBottom: '2px solid #b2ebf2' }}>
+          <Box
+            sx={{ border: "1px solid #b2ebf2", borderRadius: 2, p: 2, mt: 2 }}
+          >
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: "#0097a7",
+                fontWeight: "bold",
+                mb: 2,
+                borderBottom: "2px solid #b2ebf2",
+              }}
+            >
               Información del cliente
             </Typography>
-            {/* Grid de campos del formulario */}
             <Grid container spacing={2} alignItems="center">
-              {/* Campo Razón Social */}
               <Grid item xs={12}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Razón Social"
-                    name="razonSocial"
-                    value={form.razonSocial}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.razonSocial}
-                    size="small"
-                  />
-                  {errores.razonSocial && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
-              </Grid>
-              {/* Campo CUIT/RUT */}
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="CUIT/RUT"
-                    name="cuit"
-                    value={form.cuit}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.cuit}
-                    helperText={mensajesError.cuit}
-                    size="small"
-                  />
-                  {errores.cuit && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
-              </Grid>
-              {/* Campo Tipo de Cliente (selector) */}
-              <Grid item xs={12} sm={6} sx={{width: '50%'}}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    select
-                    label="Tipo de Cliente"
-                    name="tipoCliente"
-                    value={form.tipoCliente}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.tipoCliente}
-                    size="small"
-                  >
-                    {tiposCliente.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  {errores.tipoCliente && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
-              </Grid>
-              {/* Campos de ubicación geográfica */}
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Continente"
-                    name="continente"
-                    value={form.continente}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.continente}
-                    helperText={mensajesError.continente}
-                    size="small"
-                  />
-                  {errores.continente && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+                <TextField
+                  label="Razón Social"
+                  name="razonSocial"
+                  value={form.razonSocial}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  disabled={!camposEditables}
+                  error={Boolean(errores.razonSocial)}
+                  helperText={errores.razonSocial}
+                  size="small"
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="País"
-                    name="pais"
-                    value={form.pais}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.pais}
-                    helperText={mensajesError.pais}
-                    size="small"
-                  />
-                  {errores.pais && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+                <TextField
+                  label="CUIT/RUT"
+                  name="cuit"
+                  value={form.cuit}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  disabled={!camposEditables}
+                  error={Boolean(errores.cuit)}
+                  helperText={errores.cuit || "Formato: XX-XXXXXXXX-X"}
+                  size="small"
+                  placeholder="20-12345678-9"
+                />
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                sx={{ width: { xs: "100%", sm: "50%" } }}
+              >
+                <TextField
+                  select
+                  label="Tipo de Cliente"
+                  name="tipo"
+                  value={form.tipo}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  disabled={!camposEditables}
+                  error={Boolean(errores.tipo)}
+                  helperText={errores.tipo}
+                  size="small"
+                >
+                  {tiposCliente.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12} sx={{ width: { xs: "100%", sm: "50%" } }}>
+                <TextField
+                  select
+                  label="Dirección"
+                  name="direccionId"
+                  value={form.direccionId || ""}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  disabled={!camposEditables}
+                  error={Boolean(errores.direccionId)}
+                  helperText={errores.direccionId}
+                  size="small"
+                >
+                  {destinos.map((dest) => (
+                    <MenuItem key={dest.id} value={dest.id}>
+                      {`${dest.nombre} - ${dest.calle} ${dest.altura}`}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+
+              {/* Campos de dirección - siempre visibles cuando hay una dirección seleccionada */}
+              {form.direccionId && (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Provincia"
+                      name="provincia"
+                      value={form.provincia}
+                      fullWidth
+                      disabled
+                      size="small"
+                      variant={
+                        modoInterno === "consulta" ? "filled" : "outlined"
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Municipio"
+                      name="municipio"
+                      value={form.municipio}
+                      fullWidth
+                      disabled
+                      size="small"
+                      variant={
+                        modoInterno === "consulta" ? "filled" : "outlined"
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Localidad"
+                      name="localidad"
+                      value={form.localidad}
+                      fullWidth
+                      disabled
+                      size="small"
+                      variant={
+                        modoInterno === "consulta" ? "filled" : "outlined"
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Código Postal"
+                      name="codigoPostal"
+                      value={form.codigoPostal || ""}
+                      fullWidth
+                      disabled
+                      size="small"
+                      variant={
+                        modoInterno === "consulta" ? "filled" : "outlined"
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={8}>
+                    <TextField
+                      label="Calle"
+                      name="calle"
+                      value={form.calle}
+                      fullWidth
+                      disabled
+                      size="small"
+                      variant={
+                        modoInterno === "consulta" ? "filled" : "outlined"
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      label="Altura"
+                      name="altura"
+                      value={form.altura}
+                      fullWidth
+                      disabled
+                      size="small"
+                      variant={
+                        modoInterno === "consulta" ? "filled" : "outlined"
+                      }
+                    />
+                  </Grid>
+                </>
+              )}
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Teléfono"
+                  name="telefono"
+                  value={form.telefono}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  disabled={!camposEditables}
+                  error={Boolean(errores.telefono)}
+                  helperText={errores.telefono || "Ej: 01112345678"}
+                  size="small"
+                  placeholder="1112345678"
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Provincia"
-                    name="provincia"
-                    value={form.provincia}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.provincia}
-                    helperText={mensajesError.provincia}
-                    size="small"
-                  />
-                  {errores.provincia && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Municipio"
-                    name="municipio"
-                    value={form.municipio}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.municipio}
-                    helperText={mensajesError.municipio}
-                    size="small"
-                  />
-                  {errores.municipio && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={8}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Calle"
-                    name="calle"
-                    value={form.calle}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.calle}
-                    helperText={mensajesError.calle}
-                    size="small"
-                  />
-                  {errores.calle && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Altura"
-                    name="altura"
-                    value={form.altura}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.altura}
-                    size="small"
-                  />
-                  {errores.altura && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={3}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Teléfono"
-                    name="telefono"
-                    value={form.telefono}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.telefono}
-                    helperText={mensajesError.telefono}
-                    size="small"
-                  />
-                  {errores.telefono && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={3}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.email}
-                    helperText={mensajesError.email}
-                    size="small"
-                  />
-                  {errores.email && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+                <TextField
+                  label="Email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  disabled={!camposEditables}
+                  error={Boolean(errores.email)}
+                  helperText={errores.email}
+                  size="small"
+                  type="email"
+                  placeholder="ejemplo@empresa.com"
+                />
               </Grid>
               <Grid item xs={12}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    label="Personas Autorizadas"
-                    name="personasAutorizadas"
-                    value={form.personasAutorizadas}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!camposEditables}
-                    error={!!errores.personasAutorizadas}
-                    size="small"
-                  />
-                  {errores.personasAutorizadas && <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />}
-                </Box>
+                <TextField
+                  label="Personas Autorizadas"
+                  name="personasAutorizadas"
+                  value={form.personasAutorizadas}
+                  onChange={handleChangeCampo}
+                  fullWidth
+                  disabled={!camposEditables}
+                  error={Boolean(errores.personasAutorizadas)}
+                  helperText={
+                    errores.personasAutorizadas ||
+                    "Nombres de las personas autorizadas"
+                  }
+                  size="small"
+                  multiline
+                  rows={2}
+                  placeholder="Juan Pérez, María González"
+                />
               </Grid>
             </Grid>
           </Box>
-          {/* Botón de guardar (visible solo en modos alta y modificación) */}
-          {(modoInterno === 'alta' || modoInterno === 'modificacion') && (
-            <Box display="flex" justifyContent="flex-end" mt={2}>
+          {(modoInterno === "alta" || modoInterno === "modificacion") && (
+            <Box display="flex" justifyContent="flex-end" gap={2} mt={2}>
               <Button
                 variant="contained"
                 color="primary"
@@ -445,4 +533,4 @@ function ModalCliente({ open, onClose, modo = 'alta', cliente = null }) {
   );
 }
 
-export default ModalCliente; 
+export default ModalCliente;

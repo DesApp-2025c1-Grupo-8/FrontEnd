@@ -12,6 +12,7 @@ import SearchBar from "../components/SearchBar";
 
 function Clients() {
   const clientes = useSelector(selectClientes);
+
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
 
