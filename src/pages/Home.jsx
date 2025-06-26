@@ -27,6 +27,34 @@ function Home() {
         setLoading(false);
     }
 
+    const [reportLoading, setReportLoading] = useState(false);
+    const [errorMsgReport, setErrorMsgReport] = useState('');
+    const [dataResponseReport, setDataResponseReport] = useState('');
+
+    const handlerGenerarReporte = async () => {
+        setReportLoading(true);
+        setErrorMsgReport('');
+        setDataResponseReport('');
+
+        const request = {
+            fechaInicio: "2024-01-01",
+            fechaFin: "2024-12-31",
+            categoriasIDs: [1, 2],  // IDs de categorías reales
+            clientesIDs: [10, 20]   // IDs de clientes reales
+        };
+
+        const { error } = await BaseService.generarReporteVolumen(request);
+
+        if (error) {
+            setErrorMsgReport("No se pudo generar el reporte: " + error);
+            console.error("Error del backend:", error);
+        } else {
+            setDataResponseReport("Reporte generado exitosamente.");
+        }
+
+        setReportLoading(false);
+    };
+
     return (
         <Container>
             <div>Home</div>
@@ -40,6 +68,18 @@ function Home() {
             </Button>
             {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
             {dataResponse && <p style={{ color: 'green' }}>{dataResponse}</p>}
+            <br />
+            <br />
+            <Button
+                variant="contained"
+                color="secondary"
+                onClick={handlerGenerarReporte}
+                disabled={reportLoading}
+            >
+                {reportLoading ? 'Generando Reporte...' : 'Generar Reporte Volumen'}
+            </Button>
+            {errorMsgReport && <p style={{ color: 'red' }}>{errorMsgReport}</p>}
+            {dataResponseReport && <p style={{ color: 'green' }}>Reporte Generado exitosamente</p>}
 
         </Container>
     )

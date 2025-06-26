@@ -17,6 +17,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { useDispatch } from "react-redux";
+import { editarCategoria, agregarCategoria } from "../redux/categorias/categoriasSlice";
 
 const estadosPosibles = [
   { value: "Activo", label: "Activo" },
@@ -33,6 +35,7 @@ const camposIniciales = {
 };
 
 function ModalCategoria({ open, onClose, modo = "alta", categoria = null }) {
+  const dispatch = useDispatch();
   const [form, setForm] = useState(camposIniciales);
   const [errores, setErrores] = useState({});
   const [mensajesError, setMensajesError] = useState({});
@@ -78,7 +81,12 @@ function ModalCategoria({ open, onClose, modo = "alta", categoria = null }) {
 
   const handleGuardar = () => {
     if (validar()) {
-      console.log("Guardar categoría:", form);
+      if (modoInterno === "modificacion") {
+        dispatch(editarCategoria(form));
+      } else if (modoInterno === "alta") {
+        dispatch(agregarCategoria(form));
+      }
+      onClose();
     }
   };
 
@@ -120,18 +128,11 @@ function ModalCategoria({ open, onClose, modo = "alta", categoria = null }) {
           </Typography>
           <Box>
             {modoInterno === "consulta" && (
-              <>
-                <Tooltip title="Editar">
-                  <IconButton onClick={handleEditar}>
-                    <EditIcon color="primary" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Eliminar">
-                  <IconButton onClick={handleEliminar}>
-                    <DeleteIcon color="error" />
-                  </IconButton>
-                </Tooltip>
-              </>
+              <Tooltip title="Editar">
+                <IconButton onClick={handleEditar}>
+                  <EditIcon color="primary" />
+                </IconButton>
+              </Tooltip>
             )}
             <Tooltip title="Cerrar">
               <IconButton onClick={onClose}>

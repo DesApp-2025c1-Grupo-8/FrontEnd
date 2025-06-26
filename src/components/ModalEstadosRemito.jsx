@@ -17,20 +17,38 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { useSelector, useDispatch } from 'react-redux';
+import { selectEstadosRemito } from '../redux/estadosRemito/estadosRemitoSlice';
+import {
+  agregarEstadoRemito,
+  actualizarEstadoRemito,
+  eliminarEstadoRemito
+} from '../redux/estadosRemito/estadosRemitoSlice';
 
 const estadosPosibles = [
   { value: "Activo", label: "Activo" },
   { value: "Inactivo", label: "Inactivo" },
 ];
 
-const camposObligatorios = ["id", "nombre", "estado"];
+const camposObligatorios = ["nombre", "estado"];
 
 const camposIniciales = {
-  id: "",
   nombre: "",
   descripcion: "",
   estado: "",
+  color: "#607d8b", // Color por defecto
 };
+
+const PALETA_COLORES = [
+  '#1976d2', // Azul
+  '#43a047', // Verde
+  '#e53935', // Rojo
+  '#ff9800', // Naranja
+  '#607d8b', // Gris
+  '#8e24aa', // Violeta
+  '#00897b', // Verde agua
+  '#fbc02d', // Amarillo
+];
 
 function ModalEstadoRemito({
   open,
@@ -43,12 +61,24 @@ function ModalEstadoRemito({
   const [mensajesError, setMensajesError] = useState({});
   const [modoInterno, setModoInterno] = useState(modo);
 
+  const dispatch = useDispatch();
+  // Obtener los estados existentes
+  const estados = useSelector(selectEstadosRemito);
+  // Excluir el color del estado actual si es edición
+  const coloresUsados = estados
+    .filter(e => e.id !== form.id)
+    .map(e => e.color);
+
   useEffect(() => {
     if (modo === "alta") {
       setForm(camposIniciales);
       setModoInterno("alta");
     } else if (estadoRemito) {
-      setForm({ ...estadoRemito });
+      setForm({
+        ...camposIniciales,
+        ...estadoRemito,
+        color: estadoRemito.color || "#607d8b"
+      });
       setModoInterno(modo);
     }
     setErrores({});
@@ -83,8 +113,17 @@ function ModalEstadoRemito({
 
   const handleGuardar = () => {
     if (validar()) {
-      // Aquí se emitiría un evento o acción para guardar el estado
-      console.log("Guardar estado:", form);
+      const estadoAGuardar = {
+        ...form,
+        id: form.id || Date.now().toString(),
+      };
+      console.log("[ESTADOS] Guardando:", estadoAGuardar);
+      if (modoInterno === "alta") {
+        dispatch(agregarEstadoRemito(estadoAGuardar));
+      } else if (modoInterno === "modificacion") {
+        dispatch(actualizarEstadoRemito(estadoAGuardar));
+      }
+      onClose();
     }
   };
 
@@ -93,8 +132,10 @@ function ModalEstadoRemito({
   };
 
   const handleEliminar = () => {
-    // Acción visual para eliminar
-    console.log("Eliminar estado:", form.id);
+    if (form.id) {
+      dispatch(eliminarEstadoRemito(form.id));
+      onClose();
+    }
   };
 
   const camposEditables =
@@ -128,16 +169,12 @@ function ModalEstadoRemito({
             {getTitulo()}
           </Typography>
           <Box>
+            {/* Solo mostrar botones de acción en modo consulta */}
             {modoInterno === "consulta" && (
               <>
                 <Tooltip title="Editar">
                   <IconButton onClick={handleEditar}>
                     <EditIcon color="primary" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Eliminar">
-                  <IconButton onClick={handleEliminar}>
-                    <DeleteIcon color="error" />
                   </IconButton>
                 </Tooltip>
               </>
@@ -168,26 +205,6 @@ function ModalEstadoRemito({
               <Grid item xs={12} sm={6}>
                 <Box display="flex" alignItems="center">
                   <TextField
-                    label="ID"
-                    name="id"
-                    value={form.id}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={
-                      !camposEditables || modoInterno === "modificacion"
-                    } // No editable al modificar para evitar cambiar el id
-                    error={!!errores.id}
-                    helperText={mensajesError.id}
-                    size="small"
-                  />
-                  {errores.id && (
-                    <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />
-                  )}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center">
-                  <TextField
                     label="Nombre"
                     name="nombre"
                     value={form.nombre}
@@ -201,6 +218,60 @@ function ModalEstadoRemito({
                   {errores.nombre && (
                     <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />
                   )}
+                </Box>
+              </Grid>
+              {/* Paleta de colores predefinidos */}
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Color
+                </Typography>
+                <Box display="flex" gap={1} flexWrap="wrap">
+                  {PALETA_COLORES.map((c) => {
+                    const usado = coloresUsados.includes(c);
+                    const seleccionado = form.color === c;
+                    return (
+                      <Box
+                        key={c}
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '50%',
+                          bgcolor: c,
+                          border: seleccionado ? '3px solid #000' : '1px solid #ccc',
+                          cursor: !usado && camposEditables ? 'pointer' : 'not-allowed',
+                          opacity: usado && !seleccionado ? 0.3 : 1,
+                          transition: 'border 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          position: 'relative'
+                        }}
+                        onClick={() => !usado && camposEditables && setForm((prev) => ({ ...prev, color: c }))}
+                      >
+                        {seleccionado && (
+                          <Box sx={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: '50%',
+                            bgcolor: '#fff',
+                            border: '2px solid #000',
+                          }} />
+                        )}
+                        {usado && !seleccionado && (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              width: 24,
+                              height: 2,
+                              bgcolor: '#000',
+                              borderRadius: 1,
+                              transform: 'rotate(-45deg)',
+                            }}
+                          />
+                        )}
+                      </Box>
+                    );
+                  })}
                 </Box>
               </Grid>
               <Grid item xs={12}>

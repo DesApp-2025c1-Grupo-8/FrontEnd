@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Box, Button, Typography, Grid, Pagination } from "@mui/material";
+import { Box, Button, Typography, Grid, Pagination, Alert } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
 
@@ -9,6 +9,7 @@ import { selectRemitos } from "../redux/remitos/remitosSlice";
 import ModalRemito from "../components/ModalRemito";
 import RemitoCard from "../components/RemitoCard";
 import SearchBar from "../components/SearchBar";
+import FiltrosAvanzadosRemitos from "../components/FiltrosAvanzadosRemitos";
 
 function Documents() {
   const remitos = useSelector(selectRemitos);
@@ -18,21 +19,133 @@ function Documents() {
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Estados para filtros avanzados
+  const [filtrosAvanzados, setFiltrosAvanzados] = useState({
+    numeroRemito: "",
+    numeroRemitoDesde: "",
+    numeroRemitoHasta: "",
+    cliente: "",
+    valorDesde: "",
+    valorHasta: "",
+    provinciaOrigen: "",
+    provinciaDestino: "",
+    estado: "",
+    fechaDesde: "",
+    fechaHasta: "",
+    contenido: {
+      pallets: false,
+      bultos: false,
+      racks: false,
+      bobinas: false,
+      tambores: false,
+    },
+  });
+
   const handleDelete = (remito) =>
     alert(`Eliminar remito: ${remito.numeroRemito}`);
   const handleDownload = (remito) =>
     alert(`Descargar remito: ${remito.numeroRemito}`);
 
-  const remitosFiltrados = useMemo(() => {
-    if (!searchTerm) return remitos;
+  // Función para aplicar filtros avanzados
+  const aplicarFiltrosAvanzados = (remitos) => {
+    return remitos.filter((remito) => {
+      // Filtro por número de remito (exacto o rango)
+      if (filtrosAvanzados.numeroRemito) {
+        if (!remito.numeroRemito?.includes(filtrosAvanzados.numeroRemito)) {
+          return false;
+        }
+      }
+      if (filtrosAvanzados.numeroRemitoDesde && remito.numeroRemito < filtrosAvanzados.numeroRemitoDesde) {
+        return false;
+      }
+      if (filtrosAvanzados.numeroRemitoHasta && remito.numeroRemito > filtrosAvanzados.numeroRemitoHasta) {
+        return false;
+      }
 
-    const lowerSearch = searchTerm.toLowerCase();
-    return remitos.filter((remito) =>
-      Object.values(remito).some((valor) =>
-        String(valor).toLowerCase().includes(lowerSearch)
-      )
-    );
-  }, [remitos, searchTerm]);
+      // Filtro por cliente
+      if (filtrosAvanzados.cliente && !remito.razonSocial?.toLowerCase().includes(filtrosAvanzados.cliente.toLowerCase())) {
+        return false;
+      }
+
+      // Filtro por rango de valor
+      const valorRemito = parseFloat(remito.valor) || 0;
+      if (filtrosAvanzados.valorDesde && valorRemito < parseFloat(filtrosAvanzados.valorDesde)) {
+        return false;
+      }
+      if (filtrosAvanzados.valorHasta && valorRemito > parseFloat(filtrosAvanzados.valorHasta)) {
+        return false;
+      }
+
+      // Filtro por provincia de origen (simulado)
+      if (filtrosAvanzados.provinciaOrigen) {
+        // Por ahora simulamos que todos los remitos son de Buenos Aires
+        if (filtrosAvanzados.provinciaOrigen !== "Buenos Aires") {
+          return false;
+        }
+      }
+
+      // Filtro por provincia de destino
+      if (filtrosAvanzados.provinciaDestino) {
+        const destinoLower = remito.destino?.toLowerCase() || "";
+        if (!destinoLower.includes(filtrosAvanzados.provinciaDestino.toLowerCase())) {
+          return false;
+        }
+      }
+
+      // Filtro por estado
+      if (filtrosAvanzados.estado && remito.estado !== filtrosAvanzados.estado) {
+        return false;
+      }
+
+      // Filtro por rango de fechas
+      if (filtrosAvanzados.fechaDesde && remito.fechaEmision < filtrosAvanzados.fechaDesde) {
+        return false;
+      }
+      if (filtrosAvanzados.fechaHasta && remito.fechaEmision > filtrosAvanzados.fechaHasta) {
+        return false;
+      }
+
+      // Filtro por contenido específico
+      const contenidoFiltros = filtrosAvanzados.contenido;
+      if (contenidoFiltros.pallets && parseInt(remito.pallets) === 0) {
+        return false;
+      }
+      if (contenidoFiltros.bultos && parseInt(remito.bultos) === 0) {
+        return false;
+      }
+      if (contenidoFiltros.racks && parseInt(remito.racks) === 0) {
+        return false;
+      }
+      if (contenidoFiltros.bobinas && parseInt(remito.bobinas) === 0) {
+        return false;
+      }
+      if (contenidoFiltros.tambores && parseInt(remito.tambores) === 0) {
+        return false;
+      }
+
+      return true;
+    });
+  };
+
+  // Aplicar filtros combinados (búsqueda simple + filtros avanzados)
+  const remitosFiltrados = useMemo(() => {
+    let remitosFiltrados = remitos;
+
+    // Primero aplicar filtros avanzados
+    remitosFiltrados = aplicarFiltrosAvanzados(remitosFiltrados);
+
+    // Luego aplicar búsqueda simple si existe
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      remitosFiltrados = remitosFiltrados.filter((remito) =>
+        Object.values(remito).some((valor) =>
+          String(valor).toLowerCase().includes(lowerSearch)
+        )
+      );
+    }
+
+    return remitosFiltrados;
+  }, [remitos, searchTerm, filtrosAvanzados]);
 
   const handleBuscarClick = () => {
     setSearchTerm(searchInput.trim());
@@ -44,6 +157,11 @@ function Documents() {
       setSearchTerm(searchInput.trim());
       setPage(1);
     }
+  };
+
+  // Función para limpiar filtros avanzados
+  const limpiarFiltrosAvanzados = () => {
+    setPage(1);
   };
 
   const [open, setOpen] = useState(false);
@@ -92,6 +210,13 @@ function Documents() {
         Gestión de Remitos
       </Typography>
 
+      {/* Resumen de resultados */}
+      {remitosFiltrados.length !== remitos.length && (
+        <Alert severity="info">
+          Se encontraron <strong>{remitosFiltrados.length}</strong> remitos de <strong>{remitos.length}</strong> total.
+        </Alert>
+      )}
+
       <Box
         display="flex"
         justifyContent="space-between"
@@ -129,6 +254,13 @@ function Documents() {
           Nuevo Remito
         </Button>
       </Box>
+
+      {/* Componente de Filtros Avanzados */}
+      <FiltrosAvanzadosRemitos
+        filtros={filtrosAvanzados}
+        onFiltrosChange={setFiltrosAvanzados}
+        onLimpiarFiltros={limpiarFiltrosAvanzados}
+      />
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {remitosPaginados.map((remito) => (

@@ -17,6 +17,8 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 // Función para generar ID único de reporte
 const generarIdReporte = () => {
@@ -79,6 +81,8 @@ function ModalReporte({ open, onClose }) {
   const [errores, setErrores] = useState({});
   const [mensajesError, setMensajesError] = useState({});
   const [clientesDisponibles] = useState([]); // TODO: Implementar carga desde Redux
+  // Estado para el checkbox de guardar reporte
+  const [guardarReporte, setGuardarReporte] = useState(false);
 
   // Resetear el formulario cuando se abre el modal
   useEffect(() => {
@@ -104,6 +108,7 @@ function ModalReporte({ open, onClose }) {
         cliente: null
       });
       setErrores({});
+      setGuardarReporte(false);
     }
   }, [open]);
 
@@ -223,7 +228,7 @@ function ModalReporte({ open, onClose }) {
   const handleGuardar = () => {
     if (validar()) {
       // Aquí iría la lógica para generar el reporte
-      console.log('Generando reporte:', form);
+      console.log('Generando reporte:', form, 'Guardar reporte:', guardarReporte);
       onClose();
     }
   };
@@ -560,6 +565,21 @@ function ModalReporte({ open, onClose }) {
 
             {form.tipoReporte && renderCamposAdicionales()}
           </Grid>
+
+          {form.tipoReporte && (
+            <Box display="flex" alignItems="center" mt={2} mb={1}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={guardarReporte}
+                    onChange={e => setGuardarReporte(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Guardar reporte"
+              />
+            </Box>
+          )}
 
           {form.tipoReporte && (
             <Box display="flex" justifyContent="flex-start" mt={4}>
