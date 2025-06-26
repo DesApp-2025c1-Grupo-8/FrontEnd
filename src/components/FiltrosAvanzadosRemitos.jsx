@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -69,22 +69,26 @@ const provincias = [
 
 function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros }) {
   const [expanded, setExpanded] = useState(false);
+  // Estado temporal para los filtros
+  const [filtrosTemp, setFiltrosTemp] = useState(filtros);
+  // Sincronizar estado temporal si los filtros globales cambian 
+  useEffect(() => { setFiltrosTemp(filtros); }, [filtros]);
 
   const handleFiltroChange = (campo, valor) => {
-    onFiltrosChange({
-      ...filtros,
+    setFiltrosTemp(prev => ({
+      ...prev,
       [campo]: valor,
-    });
+    }));
   };
 
   const handleContenidoChange = (campo) => {
-    onFiltrosChange({
-      ...filtros,
+    setFiltrosTemp(prev => ({
+      ...prev,
       contenido: {
-        ...filtros.contenido,
-        [campo]: !filtros.contenido[campo],
+        ...prev.contenido,
+        [campo]: !prev.contenido[campo],
       },
-    });
+    }));
   };
 
   const limpiarFiltros = () => {
@@ -108,11 +112,12 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
         tambores: false,
       },
     };
+    setFiltrosTemp(filtrosLimpios);
     onFiltrosChange(filtrosLimpios);
-    onLimpiarFiltros();
+    onLimpiarFiltros && onLimpiarFiltros();
   };
 
-  // Contar filtros activos
+  // Contar filtros activos 
   const filtrosActivos = Object.values(filtros).filter(valor => {
     if (typeof valor === 'string') return valor !== '';
     if (typeof valor === 'object') {
@@ -334,13 +339,13 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                   <Grid item xs={12} sm={6} md={4}>
                     <TextField
                       label="Número de remito"
-                      value={filtros.numeroRemito}
+                      value={filtrosTemp.numeroRemito}
                       onChange={(e) => handleFiltroChange("numeroRemito", e.target.value)}
                       fullWidth
                       size="small"
                       placeholder="Ej: 00001"
                       InputProps={{
-                        endAdornment: filtros.numeroRemito ? (
+                        endAdornment: filtrosTemp.numeroRemito ? (
                           <IconButton size="small" onClick={() => handleFiltroChange("numeroRemito", "")}
                             aria-label="Limpiar número de remito">
                             <ClearIcon fontSize="small" />
@@ -352,13 +357,13 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                   <Grid item xs={12} sm={6} md={4}>
                     <TextField
                       label="Cliente solicitante"
-                      value={filtros.cliente}
+                      value={filtrosTemp.cliente}
                       onChange={(e) => handleFiltroChange("cliente", e.target.value)}
                       fullWidth
                       size="small"
                       placeholder="Nombre o razón social"
                       InputProps={{
-                        endAdornment: filtros.cliente ? (
+                        endAdornment: filtrosTemp.cliente ? (
                           <IconButton size="small" onClick={() => handleFiltroChange("cliente", "")}
                             aria-label="Limpiar cliente solicitante">
                             <ClearIcon fontSize="small" />
@@ -371,7 +376,7 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <FormControl fullWidth size="small">
                       <InputLabel shrink>Estado actual</InputLabel>
                       <Select
-                        value={filtros.estado}
+                        value={filtrosTemp.estado}
                         onChange={(e) => handleFiltroChange("estado", e.target.value)}
                         label="Estado actual"
                         displayEmpty
@@ -382,7 +387,7 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                           return estadosRemito.find(e => e.value === selected)?.label || selected;
                         }}
                         endAdornment={
-                          filtros.estado ? (
+                          filtrosTemp.estado ? (
                             <InputAdornment position="end">
                               <IconButton size="small" onClick={() => handleFiltroChange("estado", "")}
                                 aria-label="Limpiar estado actual">
@@ -412,13 +417,13 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                   <Grid item xs={12} sm={6} md={6}>
                     <TextField
                       label="Remito desde"
-                      value={filtros.numeroRemitoDesde}
+                      value={filtrosTemp.numeroRemitoDesde}
                       onChange={(e) => handleFiltroChange("numeroRemitoDesde", e.target.value)}
                       fullWidth
                       size="small"
                       placeholder="00001"
                       InputProps={{
-                        endAdornment: filtros.numeroRemitoDesde ? (
+                        endAdornment: filtrosTemp.numeroRemitoDesde ? (
                           <IconButton size="small" onClick={() => handleFiltroChange("numeroRemitoDesde", "")}
                             aria-label="Limpiar número de remito desde">
                             <ClearIcon fontSize="small" />
@@ -430,13 +435,13 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                   <Grid item xs={12} sm={6} md={6}>
                     <TextField
                       label="Remito hasta"
-                      value={filtros.numeroRemitoHasta}
+                      value={filtrosTemp.numeroRemitoHasta}
                       onChange={(e) => handleFiltroChange("numeroRemitoHasta", e.target.value)}
                       fullWidth
                       size="small"
                       placeholder="00010"
                       InputProps={{
-                        endAdornment: filtros.numeroRemitoHasta ? (
+                        endAdornment: filtrosTemp.numeroRemitoHasta ? (
                           <IconButton size="small" onClick={() => handleFiltroChange("numeroRemitoHasta", "")}
                             aria-label="Limpiar número de remito hasta">
                             <ClearIcon fontSize="small" />
@@ -455,12 +460,12 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <FormControl fullWidth size="small">
                       <InputLabel shrink>Provincia origen</InputLabel>
                       <Select
-                        value={filtros.provinciaOrigen}
+                        value={filtrosTemp.provinciaOrigen}
                         onChange={(e) => handleFiltroChange("provinciaOrigen", e.target.value)}
                         label="Provincia origen"
                         displayEmpty
                         endAdornment={
-                          filtros.provinciaOrigen ? (
+                          filtrosTemp.provinciaOrigen ? (
                             <InputAdornment position="end">
                               <IconButton size="small" onClick={() => handleFiltroChange("provinciaOrigen", "")}
                                 aria-label="Limpiar provincia origen">
@@ -485,12 +490,12 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <FormControl fullWidth size="small">
                       <InputLabel shrink>Provincia destino</InputLabel>
                       <Select
-                        value={filtros.provinciaDestino}
+                        value={filtrosTemp.provinciaDestino}
                         onChange={(e) => handleFiltroChange("provinciaDestino", e.target.value)}
                         label="Provincia destino"
                         displayEmpty
                         endAdornment={
-                          filtros.provinciaDestino ? (
+                          filtrosTemp.provinciaDestino ? (
                             <InputAdornment position="end">
                               <IconButton size="small" onClick={() => handleFiltroChange("provinciaDestino", "")}
                                 aria-label="Limpiar provincia destino">
@@ -521,13 +526,13 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <TextField
                       label="Valor desde"
                       type="number"
-                      value={filtros.valorDesde}
+                      value={filtrosTemp.valorDesde}
                       onChange={(e) => handleFiltroChange("valorDesde", e.target.value)}
                       fullWidth
                       size="small"
                       InputProps={{
                         startAdornment: <AttachMoneyIcon sx={{ mr: 1, color: "text.secondary" }} />,
-                        endAdornment: filtros.valorDesde ? (
+                        endAdornment: filtrosTemp.valorDesde ? (
                           <IconButton size="small" onClick={() => handleFiltroChange("valorDesde", "")}
                             aria-label="Limpiar valor desde">
                             <ClearIcon fontSize="small" />
@@ -541,13 +546,13 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <TextField
                       label="Valor hasta"
                       type="number"
-                      value={filtros.valorHasta}
+                      value={filtrosTemp.valorHasta}
                       onChange={(e) => handleFiltroChange("valorHasta", e.target.value)}
                       fullWidth
                       size="small"
                       InputProps={{
                         startAdornment: <AttachMoneyIcon sx={{ mr: 1, color: "text.secondary" }} />,
-                        endAdornment: filtros.valorHasta ? (
+                        endAdornment: filtrosTemp.valorHasta ? (
                           <IconButton size="small" onClick={() => handleFiltroChange("valorHasta", "")}
                             aria-label="Limpiar valor hasta">
                             <ClearIcon fontSize="small" />
@@ -567,13 +572,13 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <TextField
                       label="Fecha desde"
                       type="date"
-                      value={filtros.fechaDesde}
+                      value={filtrosTemp.fechaDesde}
                       onChange={(e) => handleFiltroChange("fechaDesde", e.target.value)}
                       fullWidth
                       size="small"
                       InputLabelProps={{ shrink: true }}
                       InputProps={{
-                        endAdornment: filtros.fechaDesde ? (
+                        endAdornment: filtrosTemp.fechaDesde ? (
                           <IconButton size="small" onClick={() => handleFiltroChange("fechaDesde", "")}
                             aria-label="Limpiar fecha desde">
                             <ClearIcon fontSize="small" />
@@ -586,13 +591,13 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <TextField
                       label="Fecha hasta"
                       type="date"
-                      value={filtros.fechaHasta}
+                      value={filtrosTemp.fechaHasta}
                       onChange={(e) => handleFiltroChange("fechaHasta", e.target.value)}
                       fullWidth
                       size="small"
                       InputLabelProps={{ shrink: true }}
                       InputProps={{
-                        endAdornment: filtros.fechaHasta ? (
+                        endAdornment: filtrosTemp.fechaHasta ? (
                           <IconButton size="small" onClick={() => handleFiltroChange("fechaHasta", "")}
                             aria-label="Limpiar fecha hasta">
                             <ClearIcon fontSize="small" />
@@ -630,7 +635,7 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <FormControlLabel
                       control={
                         <Checkbox
-                          checked={filtros.contenido.pallets}
+                          checked={filtrosTemp.contenido.pallets}
                           onChange={() => handleContenidoChange("pallets")}
                           size="small"
                         />
@@ -641,7 +646,7 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <FormControlLabel
                       control={
                         <Checkbox
-                          checked={filtros.contenido.bultos}
+                          checked={filtrosTemp.contenido.bultos}
                           onChange={() => handleContenidoChange("bultos")}
                           size="small"
                         />
@@ -652,7 +657,7 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <FormControlLabel
                       control={
                         <Checkbox
-                          checked={filtros.contenido.racks}
+                          checked={filtrosTemp.contenido.racks}
                           onChange={() => handleContenidoChange("racks")}
                           size="small"
                         />
@@ -663,7 +668,7 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <FormControlLabel
                       control={
                         <Checkbox
-                          checked={filtros.contenido.bobinas}
+                          checked={filtrosTemp.contenido.bobinas}
                           onChange={() => handleContenidoChange("bobinas")}
                           size="small"
                         />
@@ -674,7 +679,7 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
                     <FormControlLabel
                       control={
                         <Checkbox
-                          checked={filtros.contenido.tambores}
+                          checked={filtrosTemp.contenido.tambores}
                           onChange={() => handleContenidoChange("tambores")}
                           size="small"
                         />
@@ -687,6 +692,19 @@ function FiltrosAvanzadosRemitos({ filtros, onFiltrosChange, onLimpiarFiltros })
               </Grid>
             </Grid>
           </Collapse>
+          {/* Botón Aplicar filtros */}
+          {expanded && (
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => onFiltrosChange(filtrosTemp)}
+                sx={{ backgroundColor: '#008893', '&:hover': { backgroundColor: '#006d73' } }}
+              >
+                Aplicar filtros
+              </Button>
+            </Box>
+          )}
         </CardContent>
       </Card>
     </Box>
