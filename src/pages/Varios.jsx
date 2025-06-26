@@ -3,9 +3,11 @@ import { Box, Button, Typography, Pagination } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
 
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { selectEstadosRemito } from "../redux/estadosRemito/estadosRemitoSlice";
 import { selectCategorias } from "../redux/categorias/categoriasSlice";
+import { eliminarEstadoRemito } from "../redux/estadosRemito/estadosRemitoSlice";
+import { borrarCategoria } from "../redux/categorias/categoriasSlice";
 
 import ModalEstadosRemito from "../components/ModalEstadosRemito";
 import ModalCategoria from "../components/ModalCategoria";
@@ -16,6 +18,7 @@ import SearchBar from "../components/SearchBar";
 function Varios() {
   const estados = useSelector(selectEstadosRemito);
   const categorias = useSelector(selectCategorias);
+  const dispatch = useDispatch();
 
   // Estados - paginación y búsqueda
   const [pageEstados, setPageEstados] = useState(1);
@@ -60,8 +63,6 @@ function Varios() {
     setPageEstados(newPage);
   };
 
-  const handleDelete = (row) => alert(`Eliminar estado: ${row.IUC}`);
-
   // Modal Estados
   const [open, setOpen] = useState(false);
   const [modo, setModo] = useState("alta");
@@ -83,6 +84,13 @@ function Varios() {
     setModo("consulta");
     setEstado(estadoSeleccionado);
     setOpen(true);
+  };
+
+  // Nuevo handler de borrar: abre el modal en modo consulta
+  const handleDelete = (estadoSeleccionado) => {
+    if (window.confirm(`¿Estás seguro de que quieres eliminar el estado "${estadoSeleccionado.nombre}"?`)) {
+      dispatch(eliminarEstadoRemito(estadoSeleccionado.id));
+    }
   };
 
   // Categorías - paginación y búsqueda
@@ -128,7 +136,11 @@ function Varios() {
     setPageCategorias(newPage);
   };
 
-  const handleDeleteCat = (row) => alert(`Eliminar categoria: ${row.id}`);
+  const handleDeleteCat = (categoriaSeleccionada) => {
+    if (window.confirm(`¿Estás seguro de que quieres eliminar la categoría "${categoriaSeleccionada.nombre}"?`)) {
+      dispatch(borrarCategoria(categoriaSeleccionada.id));
+    }
+  };
 
   // Modal Categoría
   const [openCat, setOpenCat] = useState(false);

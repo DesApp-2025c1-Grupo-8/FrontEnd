@@ -65,13 +65,10 @@ function CategoriaCard({ categoria, onView, onEdit, onDelete }) {
                 height: 70,
                 backgroundColor: "#f6fffa",
                 borderRadius: 2,
-                border: "2px solid #4caf50",
+                border: "2px solid #111",
               }}
             >
-              <CategoryIcon sx={{ color: "#4caf50", fontSize: "1.8rem", mb: 0.3 }} />
-              <Typography variant="caption" sx={{ color: "#4caf50", fontWeight: "bold", fontSize: "0.65rem" }}>
-                {categoria.id}
-              </Typography>
+              <CategoryIcon sx={{ color: "#111", fontSize: "1.8rem", mb: 0.3 }} />
             </Box>
             <Chip
               label={categoria.estado}
@@ -97,22 +94,19 @@ function CategoriaCard({ categoria, onView, onEdit, onDelete }) {
                   fontWeight: "bold", 
                   fontSize: "1.15rem", 
                   mb: 0.4,
-                  color: "#4caf50",
+                  color: "#111",
                 }}
               >
                 {categoria.nombre}
               </Typography>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <InfoIcon sx={{ fontSize: "0.85rem", color: "text.secondary" }} />
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.9rem" }}>
-                  ID: {categoria.id}
-                </Typography>
+                {/* InfoIcon eliminado */}
               </Box>
             </Box>
 
             {/* Línea 2: Descripción */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: 0.4 }}>
-              <Typography variant="body2" sx={{ fontSize: "0.8rem", fontWeight: "500", fontStyle: "italic" }}>
+              <Typography variant="body2" sx={{ fontSize: "0.8rem", fontWeight: "bold", fontStyle: "italic", color: "#111" }}>
                 {categoria.descripcion}
               </Typography>
             </Box>
