@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from "react";
-import { Box, Button, Typography, Pagination } from "@mui/material";
+import { Box, Button, Typography, Pagination, Tabs, Tab } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
 
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { selectEstadosRemito } from "../redux/estadosRemito/estadosRemitoSlice";
 import { selectCategorias } from "../redux/categorias/categoriasSlice";
+import { eliminarEstadoRemito } from "../redux/estadosRemito/estadosRemitoSlice";
+import { borrarCategoria } from "../redux/categorias/categoriasSlice";
 
 import ModalEstadosRemito from "../components/ModalEstadosRemito";
 import ModalCategoria from "../components/ModalCategoria";
@@ -16,6 +18,7 @@ import SearchBar from "../components/SearchBar";
 function Varios() {
   const estados = useSelector(selectEstadosRemito);
   const categorias = useSelector(selectCategorias);
+  const dispatch = useDispatch();
 
   // Estados - paginación y búsqueda
   const [pageEstados, setPageEstados] = useState(1);
@@ -60,8 +63,6 @@ function Varios() {
     setPageEstados(newPage);
   };
 
-  const handleDelete = (row) => alert(`Eliminar estado: ${row.IUC}`);
-
   // Modal Estados
   const [open, setOpen] = useState(false);
   const [modo, setModo] = useState("alta");
@@ -83,6 +84,13 @@ function Varios() {
     setModo("consulta");
     setEstado(estadoSeleccionado);
     setOpen(true);
+  };
+
+  // Nuevo handler de borrar: abre el modal en modo consulta
+  const handleDelete = (estadoSeleccionado) => {
+    if (window.confirm(`¿Estás seguro de que quieres eliminar el estado "${estadoSeleccionado.nombre}"?`)) {
+      dispatch(eliminarEstadoRemito(estadoSeleccionado.id));
+    }
   };
 
   // Categorías - paginación y búsqueda
@@ -128,7 +136,11 @@ function Varios() {
     setPageCategorias(newPage);
   };
 
-  const handleDeleteCat = (row) => alert(`Eliminar categoria: ${row.id}`);
+  const handleDeleteCat = (categoriaSeleccionada) => {
+    if (window.confirm(`¿Estás seguro de que quieres eliminar la categoría "${categoriaSeleccionada.nombre}"?`)) {
+      dispatch(borrarCategoria(categoriaSeleccionada.id));
+    }
+  };
 
   // Modal Categoría
   const [openCat, setOpenCat] = useState(false);
@@ -153,169 +165,180 @@ function Varios() {
     setOpenCat(true);
   };
 
+  const [tab, setTab] = useState(0);
+
   return (
     <Box display="flex" flexDirection="column" gap={4} bgcolor="#F4FFF8" p={2}>
-      <Box display="flex" flexDirection="column" gap={2}>
-        <Typography
-          variant="h2"
-          sx={{
-            color: "black",
-            borderBottom: "3px solid #4D4847",
-            width: "fit-content",
-          }}
-        >
-          Gestión de Estados
-        </Typography>
+      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
+        <Tab label="Gestión de Estados" />
+        <Tab label="Gestión de Categorías" />
+      </Tabs>
 
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          sx={{
-            flexDirection: { xs: "column", sm: "row" },
-            gap: { xs: 2, sm: 2 },
-          }}
-        >
+      {tab === 0 && (
+        <Box display="flex" flexDirection="column" gap={2}>
+          <Typography
+            variant="h2"
+            sx={{
+              color: "black",
+              borderBottom: "3px solid #4D4847",
+              width: "fit-content",
+            }}
+          >
+            Gestión de Estados
+          </Typography>
+
           <Box
             display="flex"
-            gap={2}
-            sx={{ flexDirection: { xs: "column", sm: "row" } }}
+            justifyContent="space-between"
+            sx={{
+              flexDirection: { xs: "column", sm: "row" },
+              gap: { xs: 2, sm: 2 },
+            }}
           >
-            <SearchBar
-              placeholder="Buscar estado"
-              value={searchInputEstados}
-              onChange={(e) => setSearchInputEstados(e.target.value)}
-              onKeyDown={handleKeyDownEstados}
-            />
+            <Box
+              display="flex"
+              gap={2}
+              sx={{ flexDirection: { xs: "column", sm: "row" } }}
+            >
+              <SearchBar
+                placeholder="Buscar estado"
+                value={searchInputEstados}
+                onChange={(e) => setSearchInputEstados(e.target.value)}
+                onKeyDown={handleKeyDownEstados}
+              />
+              <Button
+                variant="contained"
+                startIcon={<SearchIcon />}
+                onClick={handleBuscarEstados}
+              >
+                Buscar
+              </Button>
+            </Box>
+
             <Button
               variant="contained"
-              startIcon={<SearchIcon />}
-              onClick={handleBuscarEstados}
+              startIcon={<PersonAddIcon />}
+              onClick={handleAdd}
             >
-              Buscar
+              Nuevo Estado
             </Button>
           </Box>
 
-          <Button
-            variant="contained"
-            startIcon={<PersonAddIcon />}
-            onClick={handleAdd}
-          >
-            Nuevo Estado
-          </Button>
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-          {estadosPaginados.map((estado) => (
-            <EstadoCard
-              key={estado.id}
-              estado={estado}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-        </Box>
-
-        {totalPagesEstados > 1 && (
-          <Box display="flex" justifyContent="center" mt={2}>
-            <Pagination
-              count={totalPagesEstados}
-              page={pageEstados}
-              onChange={handleChangePageEstados}
-              color="primary"
-              size="medium"
-            />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            {estadosPaginados.map((estado) => (
+              <EstadoCard
+                key={estado.id}
+                estado={estado}
+                onView={handleView}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
           </Box>
-        )}
 
-        <ModalEstadosRemito
-          open={open}
-          onClose={() => setOpen(false)}
-          modo={modo}
-          estadoRemito={estado}
-        />
-      </Box>
+          {totalPagesEstados > 1 && (
+            <Box display="flex" justifyContent="center" mt={2}>
+              <Pagination
+                count={totalPagesEstados}
+                page={pageEstados}
+                onChange={handleChangePageEstados}
+                color="primary"
+                size="medium"
+              />
+            </Box>
+          )}
 
-      <Box display="flex" flexDirection="column" gap={2}>
-        <Typography
-          variant="h2"
-          sx={{
-            color: "black",
-            borderBottom: "3px solid #4D4847",
-            width: "fit-content",
-          }}
-        >
-          Gestión de Categorías
-        </Typography>
+          <ModalEstadosRemito
+            open={open}
+            onClose={() => setOpen(false)}
+            modo={modo}
+            estadoRemito={estado}
+          />
+        </Box>
+      )}
 
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          sx={{
-            flexDirection: { xs: "column", sm: "row" },
-            gap: { xs: 2, sm: 2 },
-          }}
-        >
+      {tab === 1 && (
+        <Box display="flex" flexDirection="column" gap={2}>
+          <Typography
+            variant="h2"
+            sx={{
+              color: "black",
+              borderBottom: "3px solid #4D4847",
+              width: "fit-content",
+            }}
+          >
+            Gestión de Categorías
+          </Typography>
+
           <Box
             display="flex"
-            gap={2}
-            sx={{ flexDirection: { xs: "column", sm: "row" } }}
+            justifyContent="space-between"
+            sx={{
+              flexDirection: { xs: "column", sm: "row" },
+              gap: { xs: 2, sm: 2 },
+            }}
           >
-            <SearchBar
-              placeholder="Buscar categoría"
-              value={searchInputCategorias}
-              onChange={(e) => setSearchInputCategorias(e.target.value)}
-              onKeyDown={handleKeyDownCategorias}
-            />
+            <Box
+              display="flex"
+              gap={2}
+              sx={{ flexDirection: { xs: "column", sm: "row" } }}
+            >
+              <SearchBar
+                placeholder="Buscar categoría"
+                value={searchInputCategorias}
+                onChange={(e) => setSearchInputCategorias(e.target.value)}
+                onKeyDown={handleKeyDownCategorias}
+              />
+              <Button
+                variant="contained"
+                startIcon={<SearchIcon />}
+                onClick={handleBuscarCategorias}
+              >
+                Buscar
+              </Button>
+            </Box>
+
             <Button
               variant="contained"
-              startIcon={<SearchIcon />}
-              onClick={handleBuscarCategorias}
+              startIcon={<PersonAddIcon />}
+              onClick={handleAddCat}
             >
-              Buscar
+              Nueva Categoría
             </Button>
           </Box>
 
-          <Button
-            variant="contained"
-            startIcon={<PersonAddIcon />}
-            onClick={handleAddCat}
-          >
-            Nueva Categoría
-          </Button>
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-          {categoriasPaginadas.map((categoria) => (
-            <CategoriaCard
-              key={categoria.id}
-              categoria={categoria}
-              onView={handleViewCat}
-              onEdit={handleEditCat}
-              onDelete={handleDeleteCat}
-            />
-          ))}
-        </Box>
-
-        {totalPagesCategorias > 1 && (
-          <Box display="flex" justifyContent="center" mt={2}>
-            <Pagination
-              count={totalPagesCategorias}
-              page={pageCategorias}
-              onChange={handleChangePageCategorias}
-              color="primary"
-              size="medium"
-            />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            {categoriasPaginadas.map((categoria) => (
+              <CategoriaCard
+                key={categoria.id}
+                categoria={categoria}
+                onView={handleViewCat}
+                onEdit={handleEditCat}
+                onDelete={handleDeleteCat}
+              />
+            ))}
           </Box>
-        )}
 
-        <ModalCategoria
-          open={openCat}
-          onClose={() => setOpenCat(false)}
-          modo={modoCat}
-          categoria={categoria}
-        />
-      </Box>
+          {totalPagesCategorias > 1 && (
+            <Box display="flex" justifyContent="center" mt={2}>
+              <Pagination
+                count={totalPagesCategorias}
+                page={pageCategorias}
+                onChange={handleChangePageCategorias}
+                color="primary"
+                size="medium"
+              />
+            </Box>
+          )}
+
+          <ModalCategoria
+            open={openCat}
+            onClose={() => setOpenCat(false)}
+            modo={modoCat}
+            categoria={categoria}
+          />
+        </Box>
+      )}
     </Box>
   );
 }

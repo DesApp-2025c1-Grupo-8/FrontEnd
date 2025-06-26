@@ -82,14 +82,10 @@ function EstadoCard({ estado, onView, onEdit, onDelete }) {
                 height: 70,
                 backgroundColor: "#f6fffa",
                 borderRadius: 2,
-                border: "2px solid",
-                borderColor: getEstadoColor(estado.nombre),
+                border: `2px solid ${estado.color || '#4caf50'}`,
               }}
             >
-              <CircleIcon sx={{ color: getEstadoColor(estado.nombre), fontSize: "1.8rem", mb: 0.3 }} />
-              <Typography variant="caption" sx={{ color: "#9c27b0", fontWeight: "bold", fontSize: "0.65rem" }}>
-                {estado.id}
-              </Typography>
+              <CircleIcon sx={{ color: estado.color || '#4caf50', fontSize: "1.8rem", mb: 0.3 }} />
             </Box>
             <Chip
               label={estado.estado}
@@ -101,6 +97,7 @@ function EstadoCard({ estado, onView, onEdit, onDelete }) {
                 fontWeight: "bold",
                 height: 22,
                 minWidth: 80,
+                letterSpacing: 1,
               }}
             />
           </Box>
@@ -115,22 +112,19 @@ function EstadoCard({ estado, onView, onEdit, onDelete }) {
                   fontWeight: "bold", 
                   fontSize: "1.15rem", 
                   mb: 0.4,
-                  color: getEstadoColor(estado.nombre),
+                  color: "#111",
                 }}
               >
                 {estado.nombre}
               </Typography>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <InfoIcon sx={{ fontSize: "0.85rem", color: "text.secondary" }} />
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.9rem" }}>
-                  ID: {estado.id}
-                </Typography>
+                {/* InfoIcon eliminado */}
               </Box>
             </Box>
 
             
             <Box sx={{ display: "flex", flexDirection: "column", gap: 0.4 }}>
-              <Typography variant="body2" sx={{ fontSize: "0.8rem", fontWeight: "500", fontStyle: "italic" }}>
+              <Typography variant="body2" sx={{ fontSize: "0.8rem", fontWeight: "bold", fontStyle: "italic", color: "#111" }}>
                 {estado.descripcion}
               </Typography>
             </Box>
