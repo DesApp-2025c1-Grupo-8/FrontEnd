@@ -25,10 +25,9 @@ const estadosPosibles = [
   { value: "Inactivo", label: "Inactivo" },
 ];
 
-const camposObligatorios = ["id", "nombre", "estado"];
+const camposObligatorios = ["nombre", "estado"];
 
 const camposIniciales = {
-  id: "",
   nombre: "",
   descripcion: "",
   estado: "",
@@ -84,7 +83,8 @@ function ModalCategoria({ open, onClose, modo = "alta", categoria = null }) {
       if (modoInterno === "modificacion") {
         dispatch(editarCategoria(form));
       } else if (modoInterno === "alta") {
-        dispatch(agregarCategoria(form));
+        const { id, ...categoriaSinId } = form;
+        dispatch(agregarCategoria(categoriaSinId));
       }
       onClose();
     }
@@ -106,7 +106,7 @@ function ModalCategoria({ open, onClose, modo = "alta", categoria = null }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <Box
         sx={{
           border: "3px solid #0097a7",
@@ -156,21 +156,8 @@ function ModalCategoria({ open, onClose, modo = "alta", categoria = null }) {
             >
               Datos de la Categoría
             </Typography>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="ID"
-                  name="id"
-                  value={form.id}
-                  onChange={handleChange}
-                  fullWidth
-                  disabled={!camposEditables || modoInterno === "modificacion"}
-                  error={!!errores.id}
-                  helperText={mensajesError.id}
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
                 <TextField
                   label="Nombre"
                   name="nombre"
@@ -196,7 +183,7 @@ function ModalCategoria({ open, onClose, modo = "alta", categoria = null }) {
                   size="small"
                 />
               </Grid>
-              <Grid item xs={12} sm={6} sx={{width: "100%"}}>
+              <Grid item xs={12}>
                 <TextField
                   select
                   label="Estado"
@@ -204,6 +191,7 @@ function ModalCategoria({ open, onClose, modo = "alta", categoria = null }) {
                   value={form.estado}
                   onChange={handleChange}
                   fullWidth
+                  variant="outlined"
                   disabled={!camposEditables}
                   error={!!errores.estado}
                   helperText={mensajesError.estado}

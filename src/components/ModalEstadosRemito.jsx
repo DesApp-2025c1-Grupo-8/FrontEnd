@@ -113,15 +113,14 @@ function ModalEstadoRemito({
 
   const handleGuardar = () => {
     if (validar()) {
-      const estadoAGuardar = {
-        ...form,
-        id: form.id || Date.now().toString(),
-      };
-      console.log("[ESTADOS] Guardando:", estadoAGuardar);
       if (modoInterno === "alta") {
-        dispatch(agregarEstadoRemito(estadoAGuardar));
+        // NO enviar ID al crear nuevo estado - el backend lo asignará
+        const { id, ...estadoSinId } = form;
+        console.log("[ESTADOS] Guardando:", estadoSinId);
+        dispatch(agregarEstadoRemito(estadoSinId));
       } else if (modoInterno === "modificacion") {
-        dispatch(actualizarEstadoRemito(estadoAGuardar));
+        console.log("[ESTADOS] Guardando:", form);
+        dispatch(actualizarEstadoRemito(form));
       }
       onClose();
     }
