@@ -1,24 +1,44 @@
-import React, { useState, useMemo } from "react";
-import { Box, Button, Typography, Pagination, Tabs, Tab } from "@mui/material";
+import React, { useState, useMemo, useEffect } from "react";
+import { Box, Button, Typography, Pagination, Tabs, Tab, Alert, CircularProgress } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
-
-import { useSelector, useDispatch } from "react-redux";
-import { selectEstadosRemito } from "../redux/estadosRemito/estadosRemitoSlice";
-import { selectCategorias } from "../redux/categorias/categoriasSlice";
-import { eliminarEstadoRemito } from "../redux/estadosRemito/estadosRemitoSlice";
-import { borrarCategoria } from "../redux/categorias/categoriasSlice";
 
 import ModalEstadosRemito from "../components/ModalEstadosRemito";
 import ModalCategoria from "../components/ModalCategoria";
 import EstadoCard from "../components/EstadoCard";
 import CategoriaCard from "../components/CategoriaCard";
 import SearchBar from "../components/SearchBar";
+import { useEstadosRemito } from "../hooks/useEstadosRemito";
+import { useCategorias } from "../hooks/useCategorias";
 
 function Varios() {
-  const estados = useSelector(selectEstadosRemito);
-  const categorias = useSelector(selectCategorias);
-  const dispatch = useDispatch();
+  // Usar los hooks personalizados
+  const {
+    estados,
+    loading: estadosLoading,
+    error: estadosError,
+    cargarEstados,
+    eliminarEstado
+  } = useEstadosRemito();
+
+  const {
+    categorias,
+    loading: categoriasLoading,
+    error: categoriasError,
+    cargarCategorias,
+    eliminarCategoria
+  } = useCategorias();
+
+  // Cargar datos del backend al montar el componente
+  useEffect(() => {
+    console.log("🔄 Cargando datos del backend...");
+    try {
+      cargarEstados();
+      cargarCategorias();
+    } catch (error) {
+      console.error("❌ Error al cargar datos:", error);
+    }
+  }, []);
 
   // Estados - paginación y búsqueda
   const [pageEstados, setPageEstados] = useState(1);
@@ -27,10 +47,10 @@ function Varios() {
   const [searchTermEstados, setSearchTermEstados] = useState("");
 
   const estadosFiltrados = useMemo(() => {
-    if (!searchTermEstados) return estados;
+    if (!searchTermEstados) return estados || [];
 
     const lowerSearch = searchTermEstados.toLowerCase();
-    return estados.filter((estado) =>
+    return (estados || []).filter((estado) =>
       Object.values(estado).some((valor) =>
         String(valor).toLowerCase().includes(lowerSearch)
       )
@@ -86,10 +106,15 @@ function Varios() {
     setOpen(true);
   };
 
-  // Nuevo handler de borrar: abre el modal en modo consulta
-  const handleDelete = (estadoSeleccionado) => {
+  // Nuevo handler de borrar: usa el hook
+  const handleDelete = async (estadoSeleccionado) => {
     if (window.confirm(`¿Estás seguro de que quieres eliminar el estado "${estadoSeleccionado.nombre}"?`)) {
-      dispatch(eliminarEstadoRemito(estadoSeleccionado.id));
+      const result = await eliminarEstado(estadoSeleccionado.id);
+      if (result.success) {
+        console.log("Estado eliminado exitosamente");
+      } else {
+        console.error("Error al eliminar estado:", result.error);
+      }
     }
   };
 
@@ -100,10 +125,10 @@ function Varios() {
   const [searchTermCategorias, setSearchTermCategorias] = useState("");
 
   const categoriasFiltradas = useMemo(() => {
-    if (!searchTermCategorias) return categorias;
+    if (!searchTermCategorias) return categorias || [];
 
     const lowerSearch = searchTermCategorias.toLowerCase();
-    return categorias.filter((categoria) =>
+    return (categorias || []).filter((categoria) =>
       Object.values(categoria).some((valor) =>
         String(valor).toLowerCase().includes(lowerSearch)
       )
@@ -136,9 +161,14 @@ function Varios() {
     setPageCategorias(newPage);
   };
 
-  const handleDeleteCat = (categoriaSeleccionada) => {
+  const handleDeleteCat = async (categoriaSeleccionada) => {
     if (window.confirm(`¿Estás seguro de que quieres eliminar la categoría "${categoriaSeleccionada.nombre}"?`)) {
-      dispatch(borrarCategoria(categoriaSeleccionada.id));
+      const result = await eliminarCategoria(categoriaSeleccionada.id);
+      if (result.success) {
+        console.log("Categoría eliminada exitosamente");
+      } else {
+        console.error("Error al eliminar categoría:", result.error);
+      }
     }
   };
 
@@ -167,8 +197,40 @@ function Varios() {
 
   const [tab, setTab] = useState(0);
 
+  // Mostrar loading o error
+  if (estadosLoading || categoriasLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box display="flex" flexDirection="column" gap={4} bgcolor="#F4FFF8" p={2}>
+      {/* Mostrar errores si existen */}
+      {estadosError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          <strong>Error de conexión con el backend:</strong> {estadosError}
+          <br />
+          <small>Verifica que el backend esté corriendo en https://localhost:7265</small>
+        </Alert>
+      )}
+      
+      {categoriasError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          <strong>Error de conexión con el backend:</strong> {categoriasError}
+          <br />
+          <small>Verifica que el backend esté corriendo en https://localhost:7265</small>
+        </Alert>
+      )}
+
+      {/* Debug info */}
+      <Alert severity="info" sx={{ mb: 2 }}>
+        Estados: {estados?.length || 0} | Categorías: {categorias?.length || 0}
+        {estadosError || categoriasError ? ' (Con errores de conexión)' : ''}
+      </Alert>
+
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
         <Tab label="Gestión de Estados" />
         <Tab label="Gestión de Categorías" />
@@ -219,21 +281,44 @@ function Varios() {
               variant="contained"
               startIcon={<PersonAddIcon />}
               onClick={handleAdd}
+              disabled={!!estadosError}
             >
               Nuevo Estado
             </Button>
           </Box>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            {estadosPaginados.map((estado) => (
-              <EstadoCard
-                key={estado.id}
-                estado={estado}
-                onView={handleView}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
+            {estadosError ? (
+              <Alert severity="warning" sx={{ py: 4 }}>
+                <Typography variant="h6" gutterBottom>
+                  No se pueden cargar los estados
+                </Typography>
+                <Typography variant="body2">
+                  El backend no está disponible. Verifica que el servidor esté corriendo en https://localhost:7265
+                </Typography>
+                <Button 
+                  variant="outlined" 
+                  sx={{ mt: 2 }}
+                  onClick={cargarEstados}
+                >
+                  Reintentar
+                </Button>
+              </Alert>
+            ) : estadosPaginados.length > 0 ? (
+              estadosPaginados.map((estado) => (
+                <EstadoCard
+                  key={estado.id}
+                  estado={estado}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))
+            ) : (
+              <Typography variant="body1" sx={{ textAlign: 'center', py: 4 }}>
+                {estadosLoading ? 'Cargando estados...' : 'No hay estados disponibles'}
+              </Typography>
+            )}
           </Box>
 
           {totalPagesEstados > 1 && (
@@ -302,21 +387,44 @@ function Varios() {
               variant="contained"
               startIcon={<PersonAddIcon />}
               onClick={handleAddCat}
+              disabled={!!categoriasError}
             >
               Nueva Categoría
             </Button>
           </Box>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            {categoriasPaginadas.map((categoria) => (
-              <CategoriaCard
-                key={categoria.id}
-                categoria={categoria}
-                onView={handleViewCat}
-                onEdit={handleEditCat}
-                onDelete={handleDeleteCat}
-              />
-            ))}
+            {categoriasError ? (
+              <Alert severity="warning" sx={{ py: 4 }}>
+                <Typography variant="h6" gutterBottom>
+                  No se pueden cargar las categorías
+                </Typography>
+                <Typography variant="body2">
+                  El backend no está disponible. Verifica que el servidor esté corriendo en https://localhost:7265
+                </Typography>
+                <Button 
+                  variant="outlined" 
+                  sx={{ mt: 2 }}
+                  onClick={cargarCategorias}
+                >
+                  Reintentar
+                </Button>
+              </Alert>
+            ) : categoriasPaginadas.length > 0 ? (
+              categoriasPaginadas.map((categoria) => (
+                <CategoriaCard
+                  key={categoria.id}
+                  categoria={categoria}
+                  onView={handleViewCat}
+                  onEdit={handleEditCat}
+                  onDelete={handleDeleteCat}
+                />
+              ))
+            ) : (
+              <Typography variant="body1" sx={{ textAlign: 'center', py: 4 }}>
+                {categoriasLoading ? 'Cargando categorías...' : 'No hay categorías disponibles'}
+              </Typography>
+            )}
           </Box>
 
           {totalPagesCategorias > 1 && (

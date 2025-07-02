@@ -7,7 +7,8 @@ class WebAPI {
     Instance() {
         if (!this._axiosInstance) {
             this._axiosInstance = axios.create({
-                baseURL: 'http://10.8.0.1:5000', // URL de API
+                //baseURL: 'http://10.8.0.1:5000', // URL de API
+                baseURL: 'https://localhost:7265', // URL de API 
                 timeout: 10000, // 10 segundos
                 headers: {
                     'Content-Type': 'application/json',
