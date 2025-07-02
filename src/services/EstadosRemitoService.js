@@ -2,9 +2,9 @@ import WebAPI from './config/WebAPI.js';
 
 class EstadosRemitoService {
     // Obtener todos los estados de remito
-    async obtenerEstados() {
+    static async obtenerEstados() {
         try {
-            const response = await WebAPI.Instance().get('/Varios/ObtenerEstados');
+            const response = await WebAPI.Instance().get('/Estados/All');
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al obtener estados:', error);
@@ -16,7 +16,7 @@ class EstadosRemitoService {
     }
 
     // Obtener un estado por ID
-    async obtenerEstadoPorId(id) {
+    static async obtenerEstadoPorId(id) {
         try {
             const response = await WebAPI.Instance().get(`/Varios/ObtenerEstado/${id}`);
             return { data: response.data, error: null };
@@ -30,7 +30,7 @@ class EstadosRemitoService {
     }
 
     // Crear nuevo estado
-    async crearEstado(estado) {
+    static async crearEstado(estado) {
         try {
             const response = await WebAPI.Instance().post('/Varios/CrearEstado', estado);
             return { data: response.data, error: null };
@@ -44,7 +44,7 @@ class EstadosRemitoService {
     }
 
     // Actualizar estado
-    async actualizarEstado(id, estado) {
+    static async actualizarEstado(id, estado) {
         try {
             const response = await WebAPI.Instance().put(`/Varios/ActualizarEstado/${id}`, estado);
             return { data: response.data, error: null };
@@ -58,7 +58,7 @@ class EstadosRemitoService {
     }
 
     // Eliminar estado
-    async eliminarEstado(id) {
+    static async eliminarEstado(id) {
         try {
             const response = await WebAPI.Instance().delete(`/Varios/EliminarEstado/${id}`);
             return { data: response.data, error: null };
@@ -72,4 +72,4 @@ class EstadosRemitoService {
     }
 }
 
-export default new EstadosRemitoService(); 
+export default EstadosRemitoService; 

@@ -2,9 +2,9 @@ import WebAPI from './config/WebAPI.js';
 
 class CategoriasService {
     // Obtener todas las categorías
-    async obtenerCategorias() {
+    static async obtenerCategorias() {
         try {
-            const response = await WebAPI.Instance().get('/Varios/ObtenerCategorias');
+            const response = await WebAPI.Instance().get('/Categoria/All');
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al obtener categorías:', error);
@@ -16,7 +16,7 @@ class CategoriasService {
     }
 
     // Obtener una categoría por ID
-    async obtenerCategoriaPorId(id) {
+    static async obtenerCategoriaPorId(id) {
         try {
             const response = await WebAPI.Instance().get(`/Varios/git s/${id}`);
             return { data: response.data, error: null };
@@ -30,7 +30,7 @@ class CategoriasService {
     }
 
     // Crear nueva categoría
-    async crearCategoria(categoria) {
+    static async crearCategoria(categoria) {
         try {
             const response = await WebAPI.Instance().post('/Varios/CrearCategoria', categoria);
             return { data: response.data, error: null };
@@ -44,7 +44,7 @@ class CategoriasService {
     }
 
     // Actualizar categoría
-    async actualizarCategoria(id, categoria) {
+    static async actualizarCategoria(id, categoria) {
         try {
             const response = await WebAPI.Instance().put(`/Varios/ActualizarCategoria/${id}`, categoria);
             return { data: response.data, error: null };
@@ -58,7 +58,7 @@ class CategoriasService {
     }
 
     // Eliminar categoría
-    async eliminarCategoria(id) {
+    static async eliminarCategoria(id) {
         try {
             const response = await WebAPI.Instance().delete(`/Varios/EliminarCategoria/${id}`);
             return { data: response.data, error: null };
@@ -72,4 +72,4 @@ class CategoriasService {
     }
 }
 
-export default new CategoriasService(); 
+export default CategoriasService; 
