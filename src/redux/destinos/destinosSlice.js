@@ -1,97 +1,35 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  lista: [
-    {
-      id: "0001",
-      nombre: "Destino 1",
-      tipo_direccion: "Domicilio",
-      provincia: "Buenos Aires",
-      municipio: "Hurlingham",
-      localidad: "Hurlingham",
-      codigo_postal: "0135",
-      calle: "Avenida Gobernador Vergara",
-      altura: "1234",
-    },
-    {
-      id: "0002",
-      nombre: "Destino 2",
-      tipo_direccion: "Domicilio",
-      provincia: "Buenos Aires",
-      municipio: "Hurlingham",
-      localidad: "Hurlingham",
-      codigo_postal: "0135",
-      calle: "Avenida Roca",
-      altura: "2531",
-    },
-    {
-      id: "0003",
-      nombre: "Destino 3",
-      tipo_direccion: "Destino",
-      provincia: "Buenos Aires",
-      municipio: "Hurlingham",
-      localidad: "Hurlingham",
-      codigo_postal: "0135",
-      calle: "Avenida Gobernador Vergara",
-      altura: "7534",
-    },
-    {
-      id: "0004",
-      nombre: "Destino 4",
-      tipo_direccion: "Domicilio",
-      provincia: "Buenos Aires",
-      municipio: "Hurlingham",
-      localidad: "Hurlingham",
-      codigo_postal: "0135",
-      calle: "Avenida Jauretche",
-      altura: "456",
-    },
-    {
-      id: "0005",
-      nombre: "Destino 5",
-      tipo_direccion: "Destino",
-      provincia: "Buenos Aires",
-      municipio: "Hurlingham",
-      localidad: "Hurlingham",
-      codigo_postal: "0135",
-      calle: "Bustamante",
-      altura: "1696",
-    },
-    {
-      id: "0006",
-      nombre: "Destino 6",
-      tipo_direccion: "Domicilio",
-      provincia: "Buenos Aires",
-      municipio: "Hurlingham",
-      localidad: "Hurlingham",
-      codigo_postal: "0135",
-      calle: "Argerich",
-      altura: "976",
-    },
-    {
-      id: "0007",
-      nombre: "Destino 7",
-      tipo_direccion: "Destino",
-      provincia: "Buenos Aires",
-      municipio: "Hurlingham",
-      localidad: "Hurlingham",
-      codigo_postal: "0135",
-      calle: "Ricchieri",
-      altura: "1616",
-    },
-  ],
+  lista: [],
   seleccionado: null,
+  loading: false,
+  error: null,
 };
 
 const destinosSlice = createSlice({
   name: "destinos",
   initialState,
   reducers: {
-    agregarDestino(state, action) {
+    setDestinos(state, action) {
+      state.lista = action.payload || [];
+    },
+    addDestino(state, action) {
       state.lista.push(action.payload);
     },
-    eliminarDestino(state, action) {
+    updateDestinoLocal(state, action) {
+      const { id, destino } = action.payload;
+      const idx = state.lista.findIndex((d) => d.id === id);
+      if (idx !== -1) state.lista[idx] = destino;
+    },
+    deleteDestinoLocal(state, action) {
       state.lista = state.lista.filter((d) => d.id !== action.payload);
+    },
+    setLoading(state, action) {
+      state.loading = action.payload;
+    },
+    setError(state, action) {
+      state.error = action.payload;
     },
     seleccionarDestino(state, action) {
       state.seleccionado = action.payload;
@@ -103,12 +41,18 @@ const destinosSlice = createSlice({
 });
 
 export const {
-  agregarDestino,
-  eliminarDestino,
+  setDestinos,
+  addDestino,
+  updateDestinoLocal,
+  deleteDestinoLocal,
+  setLoading,
+  setError,
   seleccionarDestino,
   limpiarSeleccion,
 } = destinosSlice.actions;
 
 export const selectDestinos = (state) => state.destinos.lista;
+export const selectDestinosLoading = (state) => state.destinos.loading;
+export const selectDestinosError = (state) => state.destinos.error;
 
 export default destinosSlice.reducer;

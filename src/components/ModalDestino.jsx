@@ -45,7 +45,7 @@ const tiposDireccion = [
   { value: "Domicilio", label: "Domicilio" },
 ];
 
-const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
+const ModalDestino = ({ open, onClose, modo = "alta", destino = null, onSave }) => {
   const dispatch = useDispatch();
   const { sugerencias = [], estado = "idle" } = useSelector(
     (state) => state.direcciones || { sugerencias: [], estado: "idle" }
@@ -243,8 +243,22 @@ const ModalDestino = ({ open, onClose, modo = "alta", destino = null }) => {
       return;
     }
 
-    console.log("Destino guardado:", form);
-    onClose();
+    // Preparar los datos para guardar
+    const datosParaGuardar = {
+      ...form,
+      // Si es modificación, incluir el ID del destino
+      ...(modo === "modificacion" && destino?.id && { id: destino.id })
+    };
+
+    console.log("Destino a guardar:", datosParaGuardar);
+    
+    // Llamar a onSave si está disponible
+    if (onSave) {
+      onSave(datosParaGuardar, modo);
+    } else {
+      // Fallback: solo cerrar el modal
+      onClose();
+    }
   };
 
   return (
