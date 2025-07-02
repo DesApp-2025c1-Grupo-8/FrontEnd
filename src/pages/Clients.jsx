@@ -1,17 +1,24 @@
-import React, { useState, useMemo } from "react";
-import { Box, Button, Typography, Grid, Pagination } from "@mui/material";
+import React, { useState, useMemo, useEffect } from "react";
+import { Box, Button, Typography, Grid, Pagination, CircularProgress, Alert } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
 
-import { useSelector } from "react-redux";
-import { selectClientes } from "../redux/clientes/clientesSlice";
+import { useClientes } from "../hooks/useClientes";
 
 import ModalCliente from "../components/ModalCliente";
 import ClienteCard from "../components/ClienteCard";
 import SearchBar from "../components/SearchBar";
 
 function Clients() {
-  const clientes = useSelector(selectClientes);
+  const {
+    clientes,
+    loading,
+    error,
+    cargarClientes,
+    crearCliente,
+    actualizarCliente,
+    eliminarCliente
+  } = useClientes();
 
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
@@ -19,8 +26,34 @@ function Clients() {
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleCopy = (cliente) => alert(`Copiar cliente: ${cliente.IUC}`);
-  const handleDelete = (cliente) => alert(`Eliminar cliente: ${cliente.IUC}`);
+  useEffect(() => {
+    cargarClientes();
+  }, []);
+
+  const handleCopy = (cliente) => {
+    const clienteInfo = `${cliente.razonSocial} - ${cliente["CUIT/RUT"]} - ${cliente.IUC}`;
+    navigator.clipboard
+      .writeText(clienteInfo)
+      .then(() => {
+        alert("Información del cliente copiada al portapapeles.");
+      })
+      .catch((err) => {
+        console.error("Error al copiar:", err);
+        alert("No se pudo copiar la información.");
+      });
+  };
+
+  // Eliminar cliente usando hook
+  const handleDelete = async (cliente) => {
+    if (window.confirm(`¿Seguro que deseas eliminar el cliente: ${cliente.razonSocial}?`)) {
+      const result = await eliminarCliente(cliente.IUC);
+      if (result.success) {
+        console.log("Cliente eliminado exitosamente");
+      } else {
+        console.error("Error al eliminar cliente:", result.error);
+      }
+    }
+  };
 
   const clientesFiltrados = useMemo(() => {
     if (!searchTerm) return clientes;
@@ -67,6 +100,22 @@ function Clients() {
     setOpen(true);
   };
 
+  // Guardar cliente (alta o modificación)
+  const handleSave = async (datos, modoModal) => {
+    let result;
+    if (modoModal === "alta") {
+      result = await crearCliente(datos);
+    } else if (modoModal === "modificacion") {
+      result = await actualizarCliente(datos.IUC, datos);
+    }
+    
+    if (result && result.success) {
+      setOpen(false);
+    } else {
+      console.error("Error al guardar cliente:", result?.error);
+    }
+  };
+
   // Calcular paginación
   const totalPages = Math.ceil(clientesFiltrados.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
@@ -75,6 +124,15 @@ function Clients() {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
+
+  // Mostrar loading o error
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box display="flex" flexDirection="column" gap={3} bgcolor="#F4FFF8" p={3}>
@@ -88,6 +146,21 @@ function Clients() {
       >
         Gestión de Clientes
       </Typography>
+
+      {/* Mostrar errores si existen */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          <strong>Error de conexión con el backend:</strong> {error}
+          <br />
+          <small>Verifica que el backend esté corriendo en https://localhost:7265</small>
+        </Alert>
+      )}
+
+      {/* Debug info */}
+      <Alert severity="info" sx={{ mb: 2 }}>
+        Clientes: {clientes?.length || 0}
+        {error ? ' (Con errores de conexión)' : ''}
+      </Alert>
 
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{flexDirection: { xs: 'column', sm: 'row' }, gap:{ xs: 2, sm: 0 }}}>
         <Box display="flex" gap={2} sx={{flexDirection: { xs: 'column', sm: 'row' }}}>
@@ -110,22 +183,45 @@ function Clients() {
           variant="contained"
           startIcon={<PersonAddIcon />}
           onClick={handleAdd}
+          disabled={!!error}
         >
           Nuevo Cliente
         </Button>
       </Box>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        {clientesPaginados.map((cliente) => (
-          <ClienteCard
-            key={cliente.IUC}
-            cliente={cliente}
-            onView={handleView}
-            onEdit={handleEdit}
-            onCopy={handleCopy}
-            onDelete={handleDelete}
-          />
-        ))}
+        {error ? (
+          <Alert severity="warning" sx={{ py: 4 }}>
+            <Typography variant="h6" gutterBottom>
+              No se pueden cargar los clientes
+            </Typography>
+            <Typography variant="body2">
+              El backend no está disponible. Verifica que el servidor esté corriendo en https://localhost:7265
+            </Typography>
+            <Button 
+              variant="outlined" 
+              sx={{ mt: 2 }}
+              onClick={cargarClientes}
+            >
+              Reintentar
+            </Button>
+          </Alert>
+        ) : clientesPaginados.length > 0 ? (
+          clientesPaginados.map((cliente) => (
+            <ClienteCard
+              key={cliente.IUC}
+              cliente={cliente}
+              onView={handleView}
+              onEdit={handleEdit}
+              onCopy={handleCopy}
+              onDelete={handleDelete}
+            />
+          ))
+        ) : (
+          <Typography variant="body1" sx={{ textAlign: 'center', py: 4 }}>
+            {loading ? 'Cargando clientes...' : 'No hay clientes disponibles'}
+          </Typography>
+        )}
       </Box>
 
       {totalPages > 1 && (
@@ -145,6 +241,7 @@ function Clients() {
         onClose={() => setOpen(false)}
         modo={modo}
         cliente={cliente}
+        onSave={handleSave}
       />
     </Box>
   );

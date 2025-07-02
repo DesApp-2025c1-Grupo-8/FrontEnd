@@ -56,7 +56,7 @@ const camposIniciales = {
   personasAutorizadas: "",
 };
 
-function ModalCliente({ open, onClose, modo = "alta", cliente = null }) {
+function ModalCliente({ open, onClose, modo = "alta", cliente = null, onSave }) {
   const [form, setForm] = useState(camposIniciales);
   const [errores, setErrores] = useState({});
   const [modoInterno, setModoInterno] = useState(modo);
@@ -219,14 +219,37 @@ function ModalCliente({ open, onClose, modo = "alta", cliente = null }) {
     setErrores((prev) => ({ ...prev, [name]: mensajeError }));
   };
 
-  const handleGuardar = () => {
+  const handleGuardar = async () => {
     if (!validarFormulario()) {
       console.warn("Hay errores en el formulario. No se puede guardar.");
       return;
     }
 
-    console.log("Cliente guardado:", form);
-    onClose();
+    // Preparar los datos del cliente en el formato esperado
+    const datosCliente = {
+      razonSocial: form.razonSocial,
+      "CUIT/RUT": form.cuit,
+      tipo: form.tipo,
+      direccion: form.direccionId,
+      telefono: form.telefono,
+      email: form.email,
+      personasAutorizadas: form.personasAutorizadas,
+    };
+
+    // Si es modificación, incluir el IUC
+    if (modoInterno === "modificacion" && cliente) {
+      datosCliente.IUC = cliente.IUC;
+    }
+
+    console.log("Datos del cliente a guardar:", datosCliente);
+
+    // Si hay función onSave, usarla
+    if (onSave) {
+      await onSave(datosCliente, modoInterno);
+    } else {
+      console.log("Cliente guardado (sin backend):", datosCliente);
+      onClose();
+    }
   };
 
   const handleEditar = () => {
