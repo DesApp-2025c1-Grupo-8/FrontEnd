@@ -2,9 +2,9 @@ import WebAPI from './config/WebAPI.js';
 
 class CategoriasService {
     // Obtener todas las categorías
-    async obtenerCategorias() {
+    static async obtenerCategorias() {
         try {
-            const response = await WebAPI.Instance().get('/Varios/ObtenerCategorias');
+            const response = await WebAPI.Instance().get('/Categoria/All');
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al obtener categorías:', error);
@@ -16,9 +16,9 @@ class CategoriasService {
     }
 
     // Obtener una categoría por ID
-    async obtenerCategoriaPorId(id) {
+    static async obtenerCategoriaPorId(id) {
         try {
-            const response = await WebAPI.Instance().get(`/Varios/git s/${id}`);
+            const response = await WebAPI.Instance().get(`/Categoria/get/${id}`);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al obtener categoría por ID:', error);
@@ -30,9 +30,9 @@ class CategoriasService {
     }
 
     // Crear nueva categoría
-    async crearCategoria(categoria) {
+    static async crearCategoria(categoria) {
         try {
-            const response = await WebAPI.Instance().post('/Varios/CrearCategoria', categoria);
+            const response = await WebAPI.Instance().post('/Categoria/Create', categoria);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al crear categoría:', error);
@@ -44,9 +44,9 @@ class CategoriasService {
     }
 
     // Actualizar categoría
-    async actualizarCategoria(id, categoria) {
+    static async actualizarCategoria(id, categoria) {
         try {
-            const response = await WebAPI.Instance().put(`/Varios/ActualizarCategoria/${id}`, categoria);
+            const response = await WebAPI.Instance().put(`/Categoria/update/${id}`, categoria);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al actualizar categoría:', error);
@@ -58,9 +58,9 @@ class CategoriasService {
     }
 
     // Eliminar categoría
-    async eliminarCategoria(id) {
+    static async eliminarCategoria(id) {
         try {
-            const response = await WebAPI.Instance().delete(`/Varios/EliminarCategoria/${id}`);
+            const response = await WebAPI.Instance().delete(`/Categoria/Delete/${id}`);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al eliminar categoría:', error);
@@ -72,4 +72,4 @@ class CategoriasService {
     }
 }
 
-export default new CategoriasService(); 
+export default CategoriasService; 
