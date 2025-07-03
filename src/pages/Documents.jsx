@@ -1,10 +1,9 @@
-import React, { useState, useMemo } from "react";
-import { Box, Button, Typography, Grid, Pagination, Alert } from "@mui/material";
+import React, { useState, useMemo, useEffect } from "react";
+import { Box, Button, Typography, Grid, Pagination, Alert, CircularProgress } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SearchIcon from "@mui/icons-material/Search";
 
-import { useSelector } from "react-redux";
-import { selectRemitos } from "../redux/remitos/remitosSlice";
+import { useRemitos } from "../hooks/useRemitos";
 
 import ModalRemito from "../components/ModalRemito";
 import RemitoCard from "../components/RemitoCard";
@@ -12,7 +11,16 @@ import SearchBar from "../components/SearchBar";
 import FiltrosAvanzadosRemitos from "../components/FiltrosAvanzadosRemitos";
 
 function Documents() {
-  const remitos = useSelector(selectRemitos);
+  const {
+    remitos,
+    loading,
+    error,
+    cargarRemitos,
+    crearRemito,
+    actualizarRemito,
+    eliminarRemito,
+    descargarRemito
+  } = useRemitos();
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -41,10 +49,32 @@ function Documents() {
     },
   });
 
-  const handleDelete = (remito) =>
-    alert(`Eliminar remito: ${remito.numeroRemito}`);
-  const handleDownload = (remito) =>
-    alert(`Descargar remito: ${remito.numeroRemito}`);
+  useEffect(() => {
+    cargarRemitos();
+  }, []);
+
+  // Eliminar remito usando hook
+  const handleDelete = async (remito) => {
+    if (window.confirm(`¿Seguro que deseas eliminar el remito: ${remito.numeroRemito}?`)) {
+      const result = await eliminarRemito(remito.numeroRemito);
+      if (result.success) {
+        console.log("Remito eliminado exitosamente");
+      } else {
+        console.error("Error al eliminar remito:", result.error);
+      }
+    }
+  };
+
+  // Descargar remito usando hook
+  const handleDownload = async (remito) => {
+    const result = await descargarRemito(remito.numeroRemito);
+    if (result.success) {
+      console.log("Remito descargado exitosamente");
+    } else {
+      console.error("Error al descargar remito:", result.error);
+      alert("Error al descargar el remito. Verifica que el backend esté disponible.");
+    }
+  };
 
   // Función para aplicar filtros avanzados
   const aplicarFiltrosAvanzados = (remitos) => {
@@ -186,6 +216,22 @@ function Documents() {
     setOpen(true);
   };
 
+  // Guardar remito (alta o modificación)
+  const handleSave = async (datos, modoModal) => {
+    let result;
+    if (modoModal === "alta") {
+      result = await crearRemito(datos);
+    } else if (modoModal === "modificacion") {
+      result = await actualizarRemito(datos.numeroRemito, datos);
+    }
+    
+    if (result && result.success) {
+      setOpen(false);
+    } else {
+      console.error("Error al guardar remito:", result?.error);
+    }
+  };
+
   const totalPages = Math.ceil(remitosFiltrados.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
   const remitosPaginados = remitosFiltrados.slice(
@@ -196,6 +242,15 @@ function Documents() {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
+
+  // Mostrar loading o error
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box display="flex" flexDirection="column" gap={3} bgcolor="#F4FFF8" p={3}>
@@ -209,6 +264,21 @@ function Documents() {
       >
         Gestión de Remitos
       </Typography>
+
+      {/* Mostrar errores si existen */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          <strong>Error de conexión con el backend:</strong> {error}
+          <br />
+          <small>Verifica que el backend esté corriendo en https://localhost:7265</small>
+        </Alert>
+      )}
+
+      {/* Debug info */}
+      <Alert severity="info" sx={{ mb: 2 }}>
+        Remitos: {remitos?.length || 0}
+        {error ? ' (Con errores de conexión)' : ''}
+      </Alert>
 
       {/* Resumen de resultados */}
       {remitosFiltrados.length !== remitos.length && (
@@ -250,6 +320,7 @@ function Documents() {
           variant="contained"
           startIcon={<PersonAddIcon />}
           onClick={handleAdd}
+          disabled={!!error}
         >
           Nuevo Remito
         </Button>
@@ -263,16 +334,38 @@ function Documents() {
       />
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        {remitosPaginados.map((remito) => (
-          <RemitoCard
-            key={remito.numeroRemito}
-            remito={remito}
-            onView={handleView}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onDownload={handleDownload}
-          />
-        ))}
+        {error ? (
+          <Alert severity="warning" sx={{ py: 4 }}>
+            <Typography variant="h6" gutterBottom>
+              No se pueden cargar los remitos
+            </Typography>
+            <Typography variant="body2">
+              El backend no está disponible. Verifica que el servidor esté corriendo en https://localhost:7265
+            </Typography>
+            <Button 
+              variant="outlined" 
+              sx={{ mt: 2 }}
+              onClick={cargarRemitos}
+            >
+              Reintentar
+            </Button>
+          </Alert>
+        ) : remitosPaginados.length > 0 ? (
+          remitosPaginados.map((remito) => (
+            <RemitoCard
+              key={remito.numeroRemito}
+              remito={remito}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onDownload={handleDownload}
+            />
+          ))
+        ) : (
+          <Typography variant="body1" sx={{ textAlign: 'center', py: 4 }}>
+            {loading ? 'Cargando remitos...' : 'No hay remitos disponibles'}
+          </Typography>
+        )}
       </Box>
 
       {totalPages > 1 && (
@@ -292,6 +385,7 @@ function Documents() {
         onClose={() => setOpen(false)}
         modo={modo}
         remito={remito}
+        onSave={handleSave}
       />
     </Box>
   );

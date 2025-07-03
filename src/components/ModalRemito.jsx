@@ -79,7 +79,7 @@ const clientesSimulados = [
   { cuit: '27-87654321-0', razonSocial: 'Organismo Estatal X', tipoCliente: 'organismo estatal' }
 ];
 
-function ModalRemito({ open, onClose, modo = 'alta', remito = null }) {
+function ModalRemito({ open, onClose, modo = 'alta', remito = null, onSave }) {
   const [form, setForm] = useState(camposIniciales);
   const [errores, setErrores] = useState({});
   const [mensajesError, setMensajesError] = useState({});
@@ -163,9 +163,45 @@ function ModalRemito({ open, onClose, modo = 'alta', remito = null }) {
     return Object.keys(nuevosErrores).length === 0;
   };
 
-  const handleGuardar = () => {
+  const handleGuardar = async () => {
     setIntentoGuardar(true);
-    validar();
+    if (!validar()) {
+      console.warn("Hay errores en el formulario. No se puede guardar.");
+      return;
+    }
+
+    // Preparar los datos del remito en el formato esperado
+    const datosRemito = {
+      numeroRemito: form.numeroRemito,
+      estado: form.estado,
+      fechaEmision: form.fechaEmision,
+      destino: form.destino,
+      razonSocial: form.razonSocial,
+      cuit: form.cuit,
+      tipoCliente: form.tipoCliente,
+      peso: form.peso,
+      volumen: form.volumen,
+      valor: form.valor,
+      categoria: form.categoria,
+      pallets: form.pallets,
+      racks: form.racks,
+      bultos: form.bultos,
+      tambores: form.tambores,
+      bobinas: form.bobinas,
+      requiereRefrigeracion: form.requiereRefrigeracion,
+      observaciones: form.observaciones,
+      documentacion: form.documentacion,
+    };
+
+    console.log("Datos del remito a guardar:", datosRemito);
+
+    // Si hay función onSave, usarla
+    if (onSave) {
+      await onSave(datosRemito, modoInterno);
+    } else {
+      console.log("Remito guardado (sin backend):", datosRemito);
+      onClose();
+    }
   };
 
   const handleEditar = () => {
