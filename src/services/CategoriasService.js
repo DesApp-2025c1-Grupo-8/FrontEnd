@@ -18,7 +18,7 @@ class CategoriasService {
     // Obtener una categoría por ID
     static async obtenerCategoriaPorId(id) {
         try {
-            const response = await WebAPI.Instance().get(`/Varios/git s/${id}`);
+            const response = await WebAPI.Instance().get(`/Categoria/get/${id}`);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al obtener categoría por ID:', error);
@@ -32,7 +32,7 @@ class CategoriasService {
     // Crear nueva categoría
     static async crearCategoria(categoria) {
         try {
-            const response = await WebAPI.Instance().post('/Varios/CrearCategoria', categoria);
+            const response = await WebAPI.Instance().post('/Categoria/Create', categoria);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al crear categoría:', error);
@@ -46,7 +46,7 @@ class CategoriasService {
     // Actualizar categoría
     static async actualizarCategoria(id, categoria) {
         try {
-            const response = await WebAPI.Instance().put(`/Varios/ActualizarCategoria/${id}`, categoria);
+            const response = await WebAPI.Instance().put(`/Categoria/update/${id}`, categoria);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al actualizar categoría:', error);
@@ -60,7 +60,7 @@ class CategoriasService {
     // Eliminar categoría
     static async eliminarCategoria(id) {
         try {
-            const response = await WebAPI.Instance().delete(`/Varios/EliminarCategoria/${id}`);
+            const response = await WebAPI.Instance().delete(`/Categoria/Delete/${id}`);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al eliminar categoría:', error);

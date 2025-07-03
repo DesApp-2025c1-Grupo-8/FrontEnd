@@ -18,7 +18,7 @@ class EstadosRemitoService {
     // Obtener un estado por ID
     static async obtenerEstadoPorId(id) {
         try {
-            const response = await WebAPI.Instance().get(`/Varios/ObtenerEstado/${id}`);
+            const response = await WebAPI.Instance().get(`/Estados/get/${id}`);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al obtener estado por ID:', error);
@@ -32,7 +32,7 @@ class EstadosRemitoService {
     // Crear nuevo estado
     static async crearEstado(estado) {
         try {
-            const response = await WebAPI.Instance().post('/Varios/CrearEstado', estado);
+            const response = await WebAPI.Instance().post('/Estados/Create', estado);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al crear estado:', error);
@@ -46,7 +46,7 @@ class EstadosRemitoService {
     // Actualizar estado
     static async actualizarEstado(id, estado) {
         try {
-            const response = await WebAPI.Instance().put(`/Varios/ActualizarEstado/${id}`, estado);
+            const response = await WebAPI.Instance().put(`/Estados/update/${id}`, estado);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al actualizar estado:', error);
@@ -60,7 +60,7 @@ class EstadosRemitoService {
     // Eliminar estado
     static async eliminarEstado(id) {
         try {
-            const response = await WebAPI.Instance().delete(`/Varios/EliminarEstado/${id}`);
+            const response = await WebAPI.Instance().delete(`/Estados/Delete/${id}`);
             return { data: response.data, error: null };
         } catch (error) {
             console.error('Error al eliminar estado:', error);
